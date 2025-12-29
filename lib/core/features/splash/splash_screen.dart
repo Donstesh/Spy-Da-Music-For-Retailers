@@ -11,25 +11,6 @@ class SplashScreen extends StatefulWidget {
 
 class _SplashScreenState extends State<SplashScreen> {
   @override
-  void initState() {
-    super.initState();
-    _initializeApp();
-  }
-
-  Future<void> _initializeApp() async {
-    // Load necessary data
-    await Future.wait([
-      // You can add preloading of data here
-      Future.delayed(const Duration(milliseconds: 500)),
-    ]);
-
-    // Navigate to main app
-    if (mounted) {
-      Navigator.pushReplacementNamed(context, '/main');
-    }
-  }
-
-  @override
   Widget build(BuildContext context) {
     return Scaffold(
       backgroundColor: AppColors.primaryColor,
@@ -37,8 +18,30 @@ class _SplashScreenState extends State<SplashScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Try to load icon_foreground, fallback to text
-            _buildLogo(),
+            // Use icon_foreground for splash screen
+            Image.asset(
+              'assets/icons/icon_foreground.png',
+              width: 150.w,
+              height: 150.w,
+              fit: BoxFit.contain,
+              errorBuilder: (context, error, stackTrace) {
+                return Container(
+                  width: 150.w,
+                  height: 150.w,
+                  decoration: BoxDecoration(
+                    color: AppColors.accentColor,
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: Icon(
+                      Icons.music_note,
+                      size: 60.sp,
+                      color: AppColors.primaryColor,
+                    ),
+                  ),
+                );
+              },
+            ),
             SizedBox(height: 24.h),
             Text(
               'Spy-da Music',
@@ -62,40 +65,6 @@ class _SplashScreenState extends State<SplashScreen> {
               color: AppColors.accentColor,
             ),
           ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildLogo() {
-    try {
-      return Image.asset(
-        'assets/icons/icon_foreground.png',
-        width: 150.w,
-        height: 150.w,
-        fit: BoxFit.contain,
-        errorBuilder: (context, error, stackTrace) {
-          return _buildFallbackLogo();
-        },
-      );
-    } catch (e) {
-      return _buildFallbackLogo();
-    }
-  }
-
-  Widget _buildFallbackLogo() {
-    return Container(
-      width: 150.w,
-      height: 150.w,
-      decoration: BoxDecoration(
-        color: AppColors.accentColor,
-        shape: BoxShape.circle,
-      ),
-      child: Center(
-        child: Icon(
-          Icons.music_note,
-          size: 60.sp,
-          color: AppColors.primaryColor,
         ),
       ),
     );
