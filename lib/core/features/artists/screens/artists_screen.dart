@@ -5,7 +5,8 @@ import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/services/api_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/widgets/content_page.dart';
+import '../../../../core/widgets/loading_widget.dart';
+import '../../../../core/widgets/error_widget.dart';
 import '../../../../core/constants/api_endpoints.dart';
 import '../models/artist_model.dart';
 import 'artist_detail_screen.dart';
@@ -22,6 +23,8 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
   List<Artist> _filteredArtists = [];
   List<Artist> _allArtists = [];
   String _searchQuery = '';
+  String? _selectedGenre;
+  String? _selectedMood;
 
   @override
   void initState() {
@@ -39,15 +42,24 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
     return ArtistsData.fromJson(jsonData);
   }
 
-  void _onSearchChanged(String query) {
-    setState(() {
-      _searchQuery = query.toLowerCase();
-      _filteredArtists = _allArtists.where((artist) {
-        return artist.name.toLowerCase().contains(_searchQuery) ||
-            artist.genres.any((genre) => genre.toLowerCase().contains(_searchQuery)) ||
-            artist.bestFor.any((bestFor) => bestFor.toLowerCase().contains(_searchQuery));
-      }).toList();
-    });
+  void _applyFilters(ArtistsData data) {
+    _allArtists = data.artists;
+    _filteredArtists = _allArtists.where((artist) {
+      final matchesSearch = _searchQuery.isEmpty ||
+          artist.name.toLowerCase().contains(_searchQuery.toLowerCase()) ||
+          artist.genres.any((genre) =>
+              genre.toLowerCase().contains(_searchQuery.toLowerCase())) ||
+          artist.bestFor.any((bestFor) =>
+              bestFor.toLowerCase().contains(_searchQuery.toLowerCase()));
+
+      final matchesGenre = _selectedGenre == null ||
+          artist.genres.contains(_selectedGenre);
+
+      final matchesMood = _selectedMood == null ||
+          artist.moods.contains(_selectedMood);
+
+      return matchesSearch && matchesGenre && matchesMood;
+    }).toList();
   }
 
   @override
@@ -56,18 +68,11 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
       future: _artistsDataFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return ContentPage(
-            title: 'Artists',
-            child: Container(),
-            isLoading: true,
-          );
+          return const LoadingWidget();
         }
 
         if (snapshot.hasError) {
-          return ContentPage(
-            title: 'Artists',
-            child: Container(),
-            hasError: true,
+          return CustomErrorWidget(
             errorMessage: snapshot.error.toString(),
             onRetry: _loadArtistsData,
           );
@@ -75,49 +80,54 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
 
         if (snapshot.hasData) {
           final data = snapshot.data!;
-          _allArtists = data.artists;
-          if (_filteredArtists.isEmpty) {
-            _filteredArtists = _allArtists;
-          }
-          return _buildContent(data);
+          _applyFilters(data);
+
+          return _buildScreenContent(data);
         }
 
-        return ContentPage(
-          title: 'Artists',
-          child: Container(),
-          hasError: true,
-          errorMessage: 'No data available',
-          onRetry: _loadArtistsData,
-        );
+        return const CustomErrorWidget(errorMessage: 'No data available');
       },
     );
   }
 
-  Widget _buildContent(ArtistsData data) {
-    return ContentPage(
-      title: 'Artists',
-      showSearch: true,
-      onSearchChanged: _onSearchChanged,
-      child: Column(
-        children: [
-          // Artists Grid
-          _filteredArtists.isEmpty
+  Widget _buildScreenContent(ArtistsData data) {
+    return Column(
+      children: [
+        // Search Bar
+        Padding(
+          padding: EdgeInsets.all(16.w),
+          child: TextField(
+            decoration: InputDecoration(
+              hintText: 'Search artists, genres, or moods...',
+              prefixIcon: const Icon(Icons.search),
+              border: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(8.r),
+              ),
+            ),
+            onChanged: (value) {
+              setState(() {
+                _searchQuery = value;
+              });
+            },
+          ),
+        ),
+
+        // Filters
+        _buildFilters(data.filters),
+
+        // Artists Grid
+        Expanded(
+          child: _filteredArtists.isEmpty
               ? Center(
-            child: Padding(
-              padding: EdgeInsets.all(32.h),
-              child: Text(
-                _searchQuery.isNotEmpty
-                    ? 'No artists found for "$_searchQuery"'
-                    : 'No artists available',
-                style: AppTextStyles.bodyLarge.copyWith(
-                  color: AppColors.textSecondary,
-                ),
+            child: Text(
+              'No artists found',
+              style: AppTextStyles.bodyLarge.copyWith(
+                color: AppColors.textSecondary,
               ),
             ),
           )
               : GridView.builder(
-            shrinkWrap: true,
-            physics: const NeverScrollableScrollPhysics(),
+            padding: EdgeInsets.all(16.w),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
               crossAxisSpacing: 16.w,
@@ -129,8 +139,91 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
               return _buildArtistCard(_filteredArtists[index]);
             },
           ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildFilters(FilterSection filters) {
+    return SingleChildScrollView(
+      scrollDirection: Axis.horizontal,
+      padding: EdgeInsets.symmetric(horizontal: 16.w),
+      child: Row(
+        children: [
+          // Genre Filter
+          _buildFilterChip(
+            label: 'Genre',
+            options: filters.genres,
+            selected: _selectedGenre,
+            onSelect: (value) {
+              setState(() {
+                _selectedGenre = _selectedGenre == value ? null : value;
+              });
+            },
+          ),
+          SizedBox(width: 8.w),
+
+          // Mood Filter
+          _buildFilterChip(
+            label: 'Mood',
+            options: filters.moods,
+            selected: _selectedMood,
+            onSelect: (value) {
+              setState(() {
+                _selectedMood = _selectedMood == value ? null : value;
+              });
+            },
+          ),
+
+          // Clear Filters
+          if (_selectedGenre != null || _selectedMood != null)
+            Padding(
+              padding: EdgeInsets.only(left: 8.w),
+              child: ActionChip(
+                label: const Text('Clear'),
+                onPressed: () {
+                  setState(() {
+                    _selectedGenre = null;
+                    _selectedMood = null;
+                  });
+                },
+                backgroundColor: AppColors.accentColor.withOpacity(0.1),
+                labelStyle: AppTextStyles.bodySmall.copyWith(
+                  color: AppColors.accentColor,
+                ),
+              ),
+            ),
         ],
       ),
+    );
+  }
+
+  Widget _buildFilterChip({
+    required String label,
+    required List<String> options,
+    required String? selected,
+    required Function(String) onSelect,
+  }) {
+    return Wrap(
+      spacing: 8.w,
+      children: [
+        Text(
+          '$label:',
+          style: AppTextStyles.bodyMedium.copyWith(
+            fontWeight: FontWeight.w500,
+          ),
+        ),
+        ...options.map((option) {
+          final isSelected = selected == option;
+          return FilterChip(
+            label: Text(option),
+            selected: isSelected,
+            onSelected: (_) => onSelect(option),
+            selectedColor: AppColors.accentColor,
+            checkmarkColor: Colors.white,
+          );
+        }).toList(),
+      ],
     );
   }
 
@@ -198,6 +291,26 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
                     ),
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
+                  ),
+                  SizedBox(height: 8.h),
+                  Wrap(
+                    spacing: 4.w,
+                    runSpacing: 4.h,
+                    children: artist.bestFor
+                        .take(3)
+                        .map((bestFor) => Chip(
+                      label: Text(
+                        bestFor,
+                        style: AppTextStyles.caption,
+                      ),
+                      padding: EdgeInsets.zero,
+                      backgroundColor: AppColors.accentColor
+                          .withOpacity(0.1),
+                      labelPadding: EdgeInsets.symmetric(
+                        horizontal: 8.w,
+                      ),
+                    ))
+                        .toList(),
                   ),
                 ],
               ),

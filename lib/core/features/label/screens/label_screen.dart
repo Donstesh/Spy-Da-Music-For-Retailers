@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
+import 'package:provider/provider.dart';
 import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/services/api_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
-import '../../../../core/widgets/content_page.dart';
+import '../../../../core/widgets/loading_widget.dart';
+import '../../../../core/widgets/error_widget.dart';
 import '../../../../core/constants/api_endpoints.dart';
 import '../models/label_model.dart';
 
@@ -17,7 +19,6 @@ class LabelScreen extends StatefulWidget {
 
 class _LabelScreenState extends State<LabelScreen> {
   late Future<LabelData> _labelDataFuture;
-  String _searchQuery = '';
 
   @override
   void initState() {
@@ -41,32 +42,17 @@ class _LabelScreenState extends State<LabelScreen> {
     }
   }
 
-  void _onSearchChanged(String query) {
-    setState(() {
-      _searchQuery = query;
-      // You can add search functionality here
-      print('Search query: $query');
-    });
-  }
-
   @override
   Widget build(BuildContext context) {
     return FutureBuilder<LabelData>(
       future: _labelDataFuture,
       builder: (context, snapshot) {
         if (snapshot.connectionState == ConnectionState.waiting) {
-          return ContentPage(
-            title: 'Spy-da Music',
-            child: Container(), // Empty while loading
-            isLoading: true,
-          );
+          return const LoadingWidget();
         }
 
         if (snapshot.hasError) {
-          return ContentPage(
-            title: 'Spy-da Music',
-            child: Container(), // Empty for error
-            hasError: true,
+          return CustomErrorWidget(
             errorMessage: snapshot.error.toString(),
             onRetry: _loadLabelData,
           );
@@ -74,25 +60,17 @@ class _LabelScreenState extends State<LabelScreen> {
 
         if (snapshot.hasData) {
           final data = snapshot.data!;
-          return _buildContent(data);
+          return _buildScreenContent(data);
         }
 
-        return ContentPage(
-          title: 'Spy-da Music',
-          child: Container(), // Empty for no data
-          hasError: true,
-          errorMessage: 'No data available',
-          onRetry: _loadLabelData,
-        );
+        return const CustomErrorWidget(errorMessage: 'No data available');
       },
     );
   }
 
-  Widget _buildContent(LabelData data) {
-    return ContentPage(
-      title: 'Spy-da Music',
-      showSearch: false, // Set to true if you want search
-      onSearchChanged: _onSearchChanged,
+  Widget _buildScreenContent(LabelData data) {
+    return SingleChildScrollView(
+      padding: EdgeInsets.all(16.w),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -207,10 +185,9 @@ class _LabelScreenState extends State<LabelScreen> {
 
         if (section.cards != null)
           SizedBox(height: 16.h),
-        if (section.cards != null)
-          ...section.cards!.map((card) {
-            return _buildPlanCard(card);
-          }).toList(),
+        ...section.cards!.map((card) {
+          return _buildPlanCard(card);
+        }).toList(),
       ],
     );
   }

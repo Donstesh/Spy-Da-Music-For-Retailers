@@ -3,7 +3,8 @@ description: Spy-da Music Retailer App
 version: 1.0.0+1
 
 environment:
-  sdk: '>=3.0.0 <4.0.0'
+  sdk: ^3.9.2
+
 
 dependencies:
   flutter:
@@ -30,8 +31,12 @@ flutter:
   uses-material-design: true
   assets:
     - assets/images/
-    - assets/icons/
-    - assets/svgs/
+    - assets/icon/
+    - assets/images/onboarding1.jpg
+    - assets/images/onboarding2.jpg
+    - assets/images/onboarding3.jpg
+    - assets/images/onboarding4.jpg
+    - assets/images/splash.jpg
   fonts:
     - family: Inter
       fonts:

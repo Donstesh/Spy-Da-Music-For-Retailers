@@ -13,30 +13,63 @@ class CustomBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BottomNavigationBar(
-      currentIndex: currentIndex,
-      onTap: onTap,
-      type: BottomNavigationBarType.fixed,
-      selectedFontSize: 12.sp,
-      unselectedFontSize: 12.sp,
-      items: const [
-        BottomNavigationBarItem(
-          icon: Icon(Icons.business),
-          label: 'Label',
+    return Container(
+      height: 60.h,
+      color: Colors.black,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceAround,
+        children: [
+          _buildNavItem(Icons.business, 'Label', 0),
+          _buildNavItem(Icons.music_note, 'Artists', 1),
+          _buildNavItem(Icons.store, 'Distribution', 2),
+          _buildNavItem(Icons.contact_mail, 'Contact', 3),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildNavItem(IconData icon, String label, int index) {
+    final isSelected = currentIndex == index;
+
+    return GestureDetector(
+      onTap: () => onTap(index),
+      child: Container(
+        padding: EdgeInsets.symmetric(
+          horizontal: 12.w,
+          vertical: 8.h,
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.music_note),
-          label: 'Artists',
+        decoration: BoxDecoration(
+          color: isSelected ? Colors.red.withOpacity(0.15) : Colors.transparent,
+          borderRadius: BorderRadius.circular(8.r),
+          border: isSelected
+              ? Border.all(
+            color: Colors.red.withOpacity(0.3),
+            width: 1.w,
+          )
+              : null,
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.store),
-          label: 'Distribution',
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          crossAxisAlignment: CrossAxisAlignment.center,
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(
+              icon,
+              size: 22.sp,
+              color: isSelected ? Colors.red : Colors.red.withOpacity(0.6),
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              label,
+              style: TextStyle(
+                color: isSelected ? Colors.red : Colors.red.withOpacity(0.6),
+                fontSize: 10.sp,
+                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+              ),
+            ),
+          ],
         ),
-        BottomNavigationBarItem(
-          icon: Icon(Icons.contact_mail),
-          label: 'Contact',
-        ),
-      ],
+      ),
     );
   }
 }

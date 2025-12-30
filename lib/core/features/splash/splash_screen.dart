@@ -1,6 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
-import '../../../../core/theme/app_colors.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -12,57 +10,48 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen> {
   @override
   Widget build(BuildContext context) {
+    // Don't use MediaQuery for simple splash screen - keep it lightweight
     return Scaffold(
-      backgroundColor: AppColors.primaryColor,
+      backgroundColor: Colors.black,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            // Use icon_foreground for splash screen
-            Image.asset(
-              'assets/icons/icon_foreground.png',
-              width: 150.w,
-              height: 150.w,
-              fit: BoxFit.contain,
-              errorBuilder: (context, error, stackTrace) {
-                return Container(
-                  width: 150.w,
-                  height: 150.w,
-                  decoration: BoxDecoration(
-                    color: AppColors.accentColor,
-                    shape: BoxShape.circle,
-                  ),
-                  child: Center(
-                    child: Icon(
-                      Icons.music_note,
-                      size: 60.sp,
-                      color: AppColors.primaryColor,
-                    ),
-                  ),
-                );
-              },
-            ),
-            SizedBox(height: 24.h),
-            Text(
-              'Spy-da Music',
-              style: TextStyle(
-                fontSize: 32.sp,
-                fontWeight: FontWeight.bold,
-                color: AppColors.accentColor,
+            // Use a simple icon instead of loading an image asset
+            Container(
+              width: 120,
+              height: 120,
+              decoration: BoxDecoration(
+                color: Colors.amber,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.music_note,
+                color: Colors.black,
+                size: 50,
               ),
             ),
-            SizedBox(height: 8.h),
-            Text(
+            const SizedBox(height: 20),
+            const Text(
+              'Spy-da Music',
+              style: TextStyle(
+                fontSize: 28,
+                fontWeight: FontWeight.bold,
+                color: Colors.amber,
+              ),
+            ),
+            const SizedBox(height: 10),
+            const Text(
               'For Retailers',
               style: TextStyle(
-                fontSize: 18.sp,
+                fontSize: 18,
                 fontWeight: FontWeight.w500,
                 color: Colors.white,
               ),
             ),
-            SizedBox(height: 32.h),
-            CircularProgressIndicator(
-              color: AppColors.accentColor,
+            const SizedBox(height: 30),
+            const CircularProgressIndicator(
+              color: Colors.amber,
             ),
           ],
         ),

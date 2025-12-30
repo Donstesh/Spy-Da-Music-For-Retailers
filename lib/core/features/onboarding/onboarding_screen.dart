@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:smooth_page_indicator/smooth_page_indicator.dart';
-import '../../../../core/utils/app_preferences.dart';
+import '../../utils/app_preferences.dart';
 import 'terms_screen.dart';
 
 class OnboardingScreen extends StatefulWidget {
@@ -39,8 +38,18 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
     ),
   ];
 
+  void _completeOnboarding() async {
+    await AppPreferences.setFirstLaunchComplete();
+    Navigator.pushReplacement(
+      context,
+      MaterialPageRoute(builder: (context) => const TermsScreen()),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    final screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       body: Stack(
         children: [
@@ -53,19 +62,19 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           // Skip button
           if (_currentPage < _pages.length - 1)
             Positioned(
-              top: MediaQuery.of(context).padding.top + 20.h,
-              right: 20.w,
+              top: MediaQuery.of(context).padding.top + 20,
+              right: 20,
               child: TextButton(
                 onPressed: _completeOnboarding,
-                child: Text(
+                child: const Text(
                   'Skip',
-                  style: TextStyle(color: Colors.white, fontSize: 16.sp),
+                  style: TextStyle(color: Colors.white, fontSize: 16),
                 ),
               ),
             ),
           // Bottom controls
           Positioned(
-            bottom: 40.h,
+            bottom: 40,
             left: 0,
             right: 0,
             child: Column(
@@ -74,34 +83,34 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   controller: _pageController,
                   count: _pages.length,
                   effect: WormEffect(
-                    dotHeight: 10.h,
-                    dotWidth: 10.w,
+                    dotHeight: 10,
+                    dotWidth: 10,
                     activeDotColor: Colors.white,
                     dotColor: Colors.white54,
                   ),
                 ),
-                SizedBox(height: 30.h),
+                const SizedBox(height: 30),
                 _currentPage == _pages.length - 1
                     ? Padding(
-                  padding: EdgeInsets.symmetric(horizontal: 40.w),
+                  padding: const EdgeInsets.symmetric(horizontal: 40),
                   child: Row(
                     children: [
                       Expanded(
                         child: ElevatedButton(
                           style: ElevatedButton.styleFrom(
                             backgroundColor: Colors.red,
-                            padding: EdgeInsets.symmetric(vertical: 16.h),
+                            padding: const EdgeInsets.symmetric(vertical: 16),
                             shape: RoundedRectangleBorder(
-                              borderRadius: BorderRadius.circular(30.r),
+                              borderRadius: BorderRadius.circular(30),
                             ),
                           ),
                           onPressed: _completeOnboarding,
-                          child: Text(
+                          child: const Text(
                             'Get Started',
                             style: TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
-                              fontSize: 16.sp,
+                              fontSize: 16,
                             ),
                           ),
                         ),
@@ -117,7 +126,7 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
                   icon: Icon(
                     Icons.arrow_forward,
                     color: Colors.white,
-                    size: 40.w,
+                    size: screenWidth * 0.1,
                   ),
                 ),
               ],
@@ -125,14 +134,6 @@ class _OnboardingScreenState extends State<OnboardingScreen> {
           ),
         ],
       ),
-    );
-  }
-
-  void _completeOnboarding() async {
-    await AppPreferences.setFirstLaunchComplete();
-    Navigator.pushReplacement(
-      context,
-      MaterialPageRoute(builder: (context) => const TermsScreen()),
     );
   }
 }
@@ -171,26 +172,26 @@ class OnboardingPage extends StatelessWidget {
             ],
           ),
         ),
-        padding: EdgeInsets.all(40.w),
+        padding: const EdgeInsets.all(40),
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             const Spacer(),
             Text(
               title,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
-                fontSize: 28.sp,
+                fontSize: 28,
                 fontWeight: FontWeight.bold,
               ),
               textAlign: TextAlign.center,
             ),
-            SizedBox(height: 20.h),
+            const SizedBox(height: 20),
             Text(
               subtitle,
-              style: TextStyle(
+              style: const TextStyle(
                 color: Colors.white,
-                fontSize: 18.sp,
+                fontSize: 18,
               ),
               textAlign: TextAlign.center,
             ),
