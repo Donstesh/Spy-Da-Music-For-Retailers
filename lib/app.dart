@@ -20,103 +20,40 @@ class _MainAppState extends State<MainApp> {
   bool _showSearchField = false;
   final TextEditingController _searchController = TextEditingController();
   late List<Widget> _screens;
-  final Map<int, GlobalKey<RefreshableScreenState>> _refreshKeys = {
-    0: GlobalKey<RefreshableScreenState>(),
-    1: GlobalKey<RefreshableScreenState>(),
-    2: GlobalKey<RefreshableScreenState>(),
-    3: GlobalKey<RefreshableScreenState>(),
-  };
+  int _refreshKey = 0;
+  final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   void initState() {
     super.initState();
+    _initializeScreens();
+  }
+
+  void _initializeScreens() {
     _screens = [
-      RefreshableScreen(
-        key: _refreshKeys[0],
-        child: const LabelScreen(),
-        onRefresh: () async {
-          // Add LabelScreen refresh logic here
-          print('Refreshing Label Screen');
-          setState(() {
-            // Recreate the screen to trigger refresh
-            _screens[0] = RefreshableScreen(
-              key: _refreshKeys[0],
-              child: const LabelScreen(),
-              onRefresh: () async {
-                print('Refreshing Label Screen');
-                await Future.delayed(const Duration(seconds: 1));
-              },
-            );
-          });
-          await Future.delayed(const Duration(seconds: 1));
-        },
-      ),
-      RefreshableScreen(
-        key: _refreshKeys[1],
-        child: const ArtistsScreen(),
-        onRefresh: () async {
-          // Add ArtistsScreen refresh logic here
-          print('Refreshing Artists Screen');
-          setState(() {
-            // Recreate the screen to trigger refresh
-            _screens[1] = RefreshableScreen(
-              key: _refreshKeys[1],
-              child: const ArtistsScreen(),
-              onRefresh: () async {
-                print('Refreshing Artists Screen');
-                await Future.delayed(const Duration(seconds: 1));
-              },
-            );
-          });
-          await Future.delayed(const Duration(seconds: 1));
-        },
-      ),
-      RefreshableScreen(
-        key: _refreshKeys[2],
-        child: const DistributionScreen(),
-        onRefresh: () async {
-          // Add DistributionScreen refresh logic here
-          print('Refreshing Distribution Screen');
-          setState(() {
-            // Recreate the screen to trigger refresh
-            _screens[2] = RefreshableScreen(
-              key: _refreshKeys[2],
-              child: const DistributionScreen(),
-              onRefresh: () async {
-                print('Refreshing Distribution Screen');
-                await Future.delayed(const Duration(seconds: 1));
-              },
-            );
-          });
-          await Future.delayed(const Duration(seconds: 1));
-        },
-      ),
-      RefreshableScreen(
-        key: _refreshKeys[3],
-        child: const ContactScreen(),
-        onRefresh: () async {
-          // Add ContactScreen refresh logic here
-          print('Refreshing Contact Screen');
-          setState(() {
-            // Recreate the screen to trigger refresh
-            _screens[3] = RefreshableScreen(
-              key: _refreshKeys[3],
-              child: const ContactScreen(),
-              onRefresh: () async {
-                print('Refreshing Contact Screen');
-                await Future.delayed(const Duration(seconds: 1));
-              },
-            );
-          });
-          await Future.delayed(const Duration(seconds: 1));
-        },
-      ),
+      const LabelScreen(),
+      const ArtistsScreen(),
+      const DistributionScreen(),
+      const ContactScreen(),
     ];
   }
 
   void _refreshCurrentScreen() {
-    // Trigger the refresh indicator
-    _refreshKeys[_currentIndex]?.currentState?.refresh();
+    setState(() {
+      _refreshKey++;
+      _initializeScreens();
+    });
+
+    // Show snackbar using the scaffold's context
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
+        SnackBar(
+          content: Text('Refreshing ${_getScreenName()}...'),
+          duration: const Duration(seconds: 1),
+          backgroundColor: Colors.green,
+        ),
+      );
+    });
   }
 
   void _toggleSearchField() {
@@ -129,14 +66,12 @@ class _MainAppState extends State<MainApp> {
   }
 
   void _handleSearch(String query) {
-    // Handle search based on current screen
     switch (_currentIndex) {
       case 0:
         print('Searching Labels: $query');
         break;
       case 1:
         print('Searching Artists: $query');
-        // Artists screen will handle its own search
         break;
       case 2:
         print('Searching Distribution: $query');
@@ -144,6 +79,21 @@ class _MainAppState extends State<MainApp> {
       case 3:
         print('Searching Contact: $query');
         break;
+    }
+  }
+
+  String _getScreenName() {
+    switch (_currentIndex) {
+      case 0:
+        return 'Labels';
+      case 1:
+        return 'Artists';
+      case 2:
+        return 'Distribution';
+      case 3:
+        return 'Contact';
+      default:
+        return 'Screen';
     }
   }
 
@@ -159,6 +109,7 @@ class _MainAppState extends State<MainApp> {
           theme: AppTheme.lightTheme,
           debugShowCheckedModeBanner: false,
           home: Scaffold(
+            key: _scaffoldKey, // Use the global key
             drawer: const CustomDrawer(),
             appBar: PreferredSize(
               preferredSize: Size.fromHeight(kToolbarHeight),
@@ -190,7 +141,7 @@ class _MainAppState extends State<MainApp> {
                     ),
 
                     if (_showSearchField)
-                    // Search field with white background and black text
+                    // Search field
                       Expanded(
                         child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 12.w),
@@ -203,13 +154,13 @@ class _MainAppState extends State<MainApp> {
                               controller: _searchController,
                               autofocus: true,
                               style: TextStyle(
-                                color: Colors.black, // Black text for visibility
+                                color: Colors.black,
                                 fontSize: 14.sp,
                               ),
                               decoration: InputDecoration(
                                 hintText: _getSearchHint(),
                                 hintStyle: TextStyle(
-                                  color: Colors.grey[600], // Grey hint text
+                                  color: Colors.grey[600],
                                   fontSize: 14.sp,
                                 ),
                                 border: InputBorder.none,
@@ -245,12 +196,12 @@ class _MainAppState extends State<MainApp> {
                         ),
                       )
                     else
-                    // Logo/Image centered
+                    // Logo
                       Expanded(
                         child: Center(
                           child: Image.asset(
                             'assets/images/splash.jpg',
-                            height: 40.h,
+                            height: 55.h,
                             fit: BoxFit.contain,
                             errorBuilder: (context, error, stackTrace) {
                               return Container(
@@ -271,9 +222,10 @@ class _MainAppState extends State<MainApp> {
                         ),
                       ),
 
-                    // Action buttons - only show when search is not active
+                    // Action buttons
                     if (!_showSearchField)
                       Row(
+                        mainAxisSize: MainAxisSize.min,
                         children: [
                           // Search icon
                           IconButton(
@@ -283,9 +235,8 @@ class _MainAppState extends State<MainApp> {
                             ),
                             onPressed: _toggleSearchField,
                             tooltip: 'Search',
+                            padding: EdgeInsets.only(right: 0.w),
                           ),
-                          SizedBox(width: 4.w),
-                          // Refresh icon button
                           IconButton(
                             icon: const Icon(
                               Icons.refresh,
@@ -304,7 +255,6 @@ class _MainAppState extends State<MainApp> {
             bottomNavigationBar: CustomBottomNav(
               currentIndex: _currentIndex,
               onTap: (index) {
-                // Close search if open when switching screens
                 if (_showSearchField) {
                   setState(() {
                     _showSearchField = false;
@@ -341,40 +291,5 @@ class _MainAppState extends State<MainApp> {
   void dispose() {
     _searchController.dispose();
     super.dispose();
-  }
-}
-
-// Refreshable Screen Wrapper Widget
-class RefreshableScreen extends StatefulWidget {
-  final Widget child;
-  final Future<void> Function() onRefresh;
-
-  const RefreshableScreen({
-    super.key,
-    required this.child,
-    required this.onRefresh,
-  });
-
-  @override
-  RefreshableScreenState createState() => RefreshableScreenState();
-}
-
-class RefreshableScreenState extends State<RefreshableScreen> {
-  final GlobalKey<RefreshIndicatorState> _refreshIndicatorKey =
-  GlobalKey<RefreshIndicatorState>();
-
-  void refresh() {
-    _refreshIndicatorKey.currentState?.show();
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return RefreshIndicator(
-      key: _refreshIndicatorKey,
-      onRefresh: widget.onRefresh,
-      color: AppTheme.lightTheme.primaryColor,
-      backgroundColor: Colors.black,
-      child: widget.child,
-    );
   }
 }
