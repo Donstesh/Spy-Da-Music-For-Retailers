@@ -51,7 +51,7 @@ class CustomErrorWidget extends StatelessWidget {
     }
 
     if (errorString.contains('FormatException') || errorString.contains('Bad response format')) {
-      return 'Data format error\nPlease try again later';
+      return 'Please Refresh Page\nor\nCheck Your Internet Connection';
     }
 
     // Default user-friendly message
