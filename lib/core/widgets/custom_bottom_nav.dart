@@ -13,61 +13,76 @@ class CustomBottomNav extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final mediaQuery = MediaQuery.of(context);
+    final isLandscape = mediaQuery.orientation == Orientation.landscape;
+
     return Container(
-      height: 60.h,
+      height: isLandscape ? 55.h : 60.h,
       color: Colors.black,
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceAround,
         children: [
-          _buildNavItem(Icons.business, 'Label', 0),
-          _buildNavItem(Icons.music_note, 'Artists', 1),
-          _buildNavItem(Icons.store, 'Distribution', 2),
-          _buildNavItem(Icons.contact_mail, 'Contact', 3),
+          _buildNavItem(Icons.business, 'Label', 0, isLandscape),
+          _buildNavItem(Icons.music_note, 'Artists', 1, isLandscape),
+          _buildNavItem(Icons.store, 'Distribution', 2, isLandscape),
+          _buildNavItem(Icons.contact_mail, 'Contact', 3, isLandscape),
         ],
       ),
     );
   }
 
-  Widget _buildNavItem(IconData icon, String label, int index) {
+  Widget _buildNavItem(IconData icon, String label, int index, bool isLandscape) {
     final isSelected = currentIndex == index;
 
     return GestureDetector(
       onTap: () => onTap(index),
       child: Container(
+        constraints: BoxConstraints(
+          minHeight: 45.h,
+          maxHeight: 50.h,
+        ),
         padding: EdgeInsets.symmetric(
-          horizontal: 12.w,
-          vertical: 8.h,
+          horizontal: isLandscape ? 8.w : 10.w,
+          vertical: isLandscape ? 4.h : 6.h,
         ),
         decoration: BoxDecoration(
           color: isSelected ? Colors.red.withOpacity(0.15) : Colors.transparent,
           borderRadius: BorderRadius.circular(8.r),
           border: isSelected
               ? Border.all(
-            color: Colors.red.withOpacity(0.3),
+            color: Colors.red.withOpacity(0.5), // Increased from 0.3 to 0.5
             width: 1.w,
           )
               : null,
         ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          crossAxisAlignment: CrossAxisAlignment.center,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            Icon(
-              icon,
-              size: 22.sp,
-              color: isSelected ? Colors.red : Colors.red.withOpacity(0.6),
-            ),
-            SizedBox(height: 4.h),
-            Text(
-              label,
-              style: TextStyle(
-                color: isSelected ? Colors.red : Colors.red.withOpacity(0.6),
-                fontSize: 10.sp,
-                fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+        child: SizedBox(
+          width: isLandscape ? 60.w : 65.w,
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            crossAxisAlignment: CrossAxisAlignment.center,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Icon(
+                icon,
+                size: isLandscape ? 14.sp : 16.sp,
+                color: isSelected ? Colors.red : Colors.red.withOpacity(0.9), // Increased from 0.6 to 0.9
               ),
-            ),
-          ],
+              SizedBox(height: 2.h),
+              Flexible(
+                child: Text(
+                  label,
+                  style: TextStyle(
+                    color: isSelected ? Colors.red : Colors.red.withOpacity(0.9), // Increased from 0.6 to 0.9
+                    fontSize: isLandscape ? 7.sp : 8.sp,
+                    fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
+                  ),
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
+                  textAlign: TextAlign.center,
+                ),
+              ),
+            ],
+          ),
         ),
       ),
     );
