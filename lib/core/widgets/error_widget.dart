@@ -116,7 +116,7 @@ class CustomErrorWidget extends StatelessWidget {
               ElevatedButton(
                 onPressed: onRetry,
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: AppColors.accentColor,
+                  backgroundColor: AppColors.pureRed,
                   foregroundColor: Colors.white,
                   padding: EdgeInsets.symmetric(
                     horizontal: 32.w,

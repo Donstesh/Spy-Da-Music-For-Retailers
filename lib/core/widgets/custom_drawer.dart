@@ -16,83 +16,119 @@ class CustomDrawer extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Drawer(
+      width: 220.w,
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          DrawerHeader(
+          // Drawer header with 20px offset from top
+          Container(
+            height: 120.h,
             decoration: BoxDecoration(
-              color: AppColors.primaryColor,
+              color: Colors.black,
             ),
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  'Spy-da Music',
-                  style: TextStyle(
-                    fontSize: 24.sp,
-                    fontWeight: FontWeight.bold,
-                    color: Colors.white,
+            child: Padding(
+              padding: EdgeInsets.only(
+                top: 25.h, // 20px offset from top
+                left: 16.w,
+                right: 16.w,
+                bottom: 12.h,
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  // Logo/Image from app bar
+                  Image.asset(
+                    'assets/images/splash.jpg',
+                    height: 55.h,
+                    fit: BoxFit.contain,
+                    errorBuilder: (context, error, stackTrace) {
+                      return Container(
+                        height: 40.h,
+                        child: Center(
+                          child: Text(
+                            'Spy-da Music',
+                            style: TextStyle(
+                              color: Colors.amber,
+                              fontSize: 20.sp,
+                              fontWeight: FontWeight.bold,
+                            ),
+                          ),
+                        ),
+                      );
+                    },
                   ),
-                ),
-                SizedBox(height: 8.h),
-                Text(
-                  'For Retailers',
-                  style: TextStyle(
-                    fontSize: 16.sp,
-                    color: AppColors.accentColor,
+                  SizedBox(height: 8.h),
+                  // For Retailers text
+                  Text(
+                    'FOR RETAILERS',
+                    style: TextStyle(
+                      fontSize: 16.sp,
+                      color: AppColors.pureRed,
+                      fontWeight: FontWeight.w600,
+                      letterSpacing: 1.0,
+                    ),
                   ),
-                ),
-              ],
+                ],
+              ),
             ),
           ),
+
+          // Menu items
           ListTile(
-            leading: const Icon(Icons.info),
+            leading: Icon(Icons.info, size: 22.w),
             title: Text(
               'About Us',
-              style: TextStyle(fontSize: 16.sp),
+              style: TextStyle(fontSize: 15.sp),
             ),
             onTap: () => _launchUrl('${ApiEndpoints.baseUrl}/about'),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
           ),
           ListTile(
-            leading: const Icon(Icons.phone),
+            leading: Icon(Icons.phone, size: 22.w),
             title: Text(
               'Contact Sales',
-              style: TextStyle(fontSize: 16.sp),
+              style: TextStyle(fontSize: 15.sp),
             ),
             onTap: () => _launchUrl('mailto:sales@spy-damusic.com'),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
           ),
           ListTile(
-            leading: const Icon(Icons.library_music),
+            leading: Icon(Icons.library_music, size: 22.w),
             title: Text(
               'View Plans',
-              style: TextStyle(fontSize: 16.sp),
+              style: TextStyle(fontSize: 15.sp),
             ),
             onTap: () => _launchUrl(ApiEndpoints.retailPlans),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
           ),
           ListTile(
-            leading: const Icon(Icons.schedule),
+            leading: Icon(Icons.schedule, size: 22.w),
             title: Text(
               'Book Demo',
-              style: TextStyle(fontSize: 16.sp),
+              style: TextStyle(fontSize: 15.sp),
             ),
             onTap: () => _launchUrl(ApiEndpoints.bookDemo),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
           ),
           const Divider(),
           ListTile(
-            leading: const Icon(Icons.privacy_tip),
+            leading: Icon(Icons.privacy_tip, size: 22.w),
             title: Text(
               'Privacy Policy',
-              style: TextStyle(fontSize: 16.sp),
+              style: TextStyle(fontSize: 15.sp),
             ),
             onTap: () => _launchUrl('${ApiEndpoints.baseUrl}/privacy-policy'),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
           ),
           ListTile(
-            leading: const Icon(Icons.description),
+            leading: Icon(Icons.description, size: 22.w),
             title: Text(
               'Terms of Service',
-              style: TextStyle(fontSize: 16.sp),
+              style: TextStyle(fontSize: 15.sp),
             ),
             onTap: () => _launchUrl('${ApiEndpoints.baseUrl}/terms'),
+            contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
           ),
         ],
       ),
