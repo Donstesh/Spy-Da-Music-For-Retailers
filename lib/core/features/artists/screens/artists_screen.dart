@@ -1,7 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:cached_network_image/cached_network_image.dart';
-import 'package:url_launcher/url_launcher.dart';
 import '../../../../core/services/api_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
@@ -25,6 +24,7 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
   String _searchQuery = '';
   String? _selectedGenre;
   String? _selectedMood;
+  bool _isGridView = true; // Grid view as default
 
   @override
   void initState() {
@@ -60,6 +60,12 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
 
       return matchesSearch && matchesGenre && matchesMood;
     }).toList();
+  }
+
+  void _toggleView() {
+    setState(() {
+      _isGridView = !_isGridView;
+    });
   }
 
   @override
@@ -115,7 +121,7 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
         // Filters
         _buildFilters(data.filters),
 
-        // Artists Grid
+        // Artists Grid or List
         Expanded(
           child: _filteredArtists.isEmpty
               ? Center(
@@ -126,7 +132,8 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
               ),
             ),
           )
-              : GridView.builder(
+              : _isGridView
+              ? GridView.builder(
             padding: EdgeInsets.all(16.w),
             gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(
               crossAxisCount: 2,
@@ -138,9 +145,147 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
             itemBuilder: (context, index) {
               return _buildArtistCard(_filteredArtists[index]);
             },
+          )
+              : ListView.builder(
+            padding: EdgeInsets.all(16.w),
+            itemCount: _filteredArtists.length,
+            itemBuilder: (context, index) {
+              return _buildArtistListItem(_filteredArtists[index]);
+            },
           ),
         ),
       ],
+    );
+  }
+
+  // ... rest of your methods (_buildArtistListItem, _buildFilters, _buildFilterChip, _buildArtistCard)
+  // Keep all these methods exactly as they were in your original code
+  Widget _buildArtistListItem(Artist artist) {
+    return Container(
+      margin: EdgeInsets.only(bottom: 12.h),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(8.r),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 4.r,
+            offset: Offset(0, 2.h),
+          ),
+        ],
+      ),
+      child: Material(
+        color: Colors.transparent,
+        child: InkWell(
+          onTap: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (context) => ArtistDetailScreen(artist: artist),
+              ),
+            );
+          },
+          borderRadius: BorderRadius.circular(8.r),
+          child: Padding(
+            padding: EdgeInsets.all(12.w),
+            child: Row(
+              children: [
+                // Artist Image
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(6.r),
+                  child: CachedNetworkImage(
+                    imageUrl: artist.imageUrl,
+                    width: 60.w,
+                    height: 60.w,
+                    fit: BoxFit.cover,
+                    placeholder: (context, url) => Container(
+                      width: 60.w,
+                      height: 60.w,
+                      color: Colors.grey[200],
+                      child: Center(
+                        child: CircularProgressIndicator(
+                          color: AppColors.accentColor,
+                          strokeWidth: 2,
+                        ),
+                      ),
+                    ),
+                    errorWidget: (context, url, error) => Container(
+                      width: 60.w,
+                      height: 60.w,
+                      color: Colors.grey[200],
+                      child: Center(
+                        child: Icon(
+                          Icons.person,
+                          color: Colors.grey[400],
+                          size: 24.w,
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+                SizedBox(width: 12.w),
+
+                // Artist Info
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        artist.name,
+                        style: AppTextStyles.titleMedium.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        artist.genres.join(', '),
+                        style: AppTextStyles.bodySmall.copyWith(
+                          color: AppColors.textSecondary,
+                        ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      SizedBox(height: 4.h),
+                      Wrap(
+                        spacing: 4.w,
+                        runSpacing: 2.h,
+                        children: artist.bestFor
+                            .take(2)
+                            .map((bestFor) => Container(
+                          padding: EdgeInsets.symmetric(
+                            horizontal: 8.w,
+                            vertical: 2.h,
+                          ),
+                          decoration: BoxDecoration(
+                            color: AppColors.accentColor.withOpacity(0.1),
+                            borderRadius: BorderRadius.circular(4.r),
+                          ),
+                          child: Text(
+                            bestFor,
+                            style: AppTextStyles.caption.copyWith(
+                              color: AppColors.accentColor,
+                            ),
+                          ),
+                        ))
+                            .toList(),
+                      ),
+                    ],
+                  ),
+                ),
+
+                // Chevron Icon
+                Icon(
+                  Icons.chevron_right,
+                  color: AppColors.textSecondary,
+                  size: 20.w,
+                ),
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 
@@ -304,8 +449,8 @@ class _ArtistsScreenState extends State<ArtistsScreen> {
                         style: AppTextStyles.caption,
                       ),
                       padding: EdgeInsets.zero,
-                      backgroundColor: AppColors.accentColor
-                          .withOpacity(0.1),
+                      backgroundColor:
+                      AppColors.accentColor.withOpacity(0.1),
                       labelPadding: EdgeInsets.symmetric(
                         horizontal: 8.w,
                       ),
