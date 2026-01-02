@@ -115,6 +115,17 @@ class _AppLoaderState extends State<AppLoader> {
                     },
                   ),
                 ),
+                // Add "FOR RETAILERS" text here
+                SizedBox(height: 10.h), // Add some spacing
+                Text(
+                  'FOR RETAILERS',
+                  style: TextStyle(
+                    color: Colors.red,
+                    fontSize: 16.sp,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1.2,
+                  ),
+                ),
                 SizedBox(height: 8.h),
                 Container(
                   padding: EdgeInsets.symmetric(horizontal: 10.w, vertical: 4.h),

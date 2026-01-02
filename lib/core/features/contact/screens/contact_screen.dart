@@ -92,13 +92,13 @@ class _ContactScreenState extends State<ContactScreen> {
 
       // Create the email message
       final message = Message()
-        ..from = Address(_smtpUsername, 'Spy-da Recordings Contact Form')
+        ..from = Address(_smtpUsername, 'Spy-da Recordings')
         ..recipients.addAll([
           'sales@spy-darecordings.com',
           'bobby@spy-darecordings.com',
           'zak@spy-damusicgroup.com'
         ])
-        ..subject = 'New Contact Form: ${_contactForm.businessName}'
+        ..subject = 'Spy-da Recordings: ${_contactForm.businessName}'
         ..text = textMessage
         ..html = htmlMessage;
 
@@ -146,7 +146,7 @@ class _ContactScreenState extends State<ContactScreen> {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>New Contact Form Submission</title>
+    <title>Spy-Da Music Prouction</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
         .header { background-color: #d32f2f; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
@@ -162,8 +162,7 @@ class _ContactScreenState extends State<ContactScreen> {
 </head>
 <body>
     <div class="header">
-        <h1>New Contact Form Submission</h1>
-        <p>Spy-da Recordings Contact Form</p>
+        <h1>Spy-da Recordings</h1>
     </div>
     
     <div class="content">
@@ -218,7 +217,7 @@ class _ContactScreenState extends State<ContactScreen> {
 
   String _createTextEmail() {
     return """
-NEW CONTACT FORM SUBMISSION
+SPY-DA RECORDINGS SUBMISSION
 ===========================
 
 BUSINESS INFORMATION:
