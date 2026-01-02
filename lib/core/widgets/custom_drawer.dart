@@ -1,17 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:url_launcher/url_launcher.dart';
-import '../constants/api_endpoints.dart';
 import '../theme/app_colors.dart';
 
 class CustomDrawer extends StatelessWidget {
-  const CustomDrawer({super.key});
+  final Function(int) onScreenSelected;
 
-  Future<void> _launchUrl(String url) async {
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url));
-    }
-  }
+  const CustomDrawer({
+    super.key,
+    required this.onScreenSelected,
+  });
 
   @override
   Widget build(BuildContext context) {
@@ -20,15 +17,15 @@ class CustomDrawer extends StatelessWidget {
       child: ListView(
         padding: EdgeInsets.zero,
         children: [
-          // Drawer header with 20px offset from top
+          // Drawer header
           Container(
             height: 120.h,
-            decoration: BoxDecoration(
+            decoration: const BoxDecoration(
               color: Colors.black,
             ),
             child: Padding(
               padding: EdgeInsets.only(
-                top: 25.h, // 20px offset from top
+                top: 25.h,
                 left: 16.w,
                 right: 16.w,
                 bottom: 12.h,
@@ -37,29 +34,31 @@ class CustomDrawer extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  // Logo/Image from app bar
-                  Image.asset(
-                    'assets/images/splash.jpg',
-                    height: 55.h,
-                    fit: BoxFit.contain,
-                    errorBuilder: (context, error, stackTrace) {
-                      return Container(
-                        height: 40.h,
-                        child: Center(
-                          child: Text(
-                            'Spy-da Music',
-                            style: TextStyle(
-                              color: Colors.amber,
-                              fontSize: 20.sp,
-                              fontWeight: FontWeight.bold,
+                  // Logo
+                  GestureDetector(
+                    onTap: () => onScreenSelected(0), // Go to Home
+                    child: Image.asset(
+                      'assets/images/splash.jpg',
+                      height: 55.h,
+                      fit: BoxFit.contain,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Container(
+                          height: 40.h,
+                          child: Center(
+                            child: Text(
+                              'Spy-da Music',
+                              style: TextStyle(
+                                color: Colors.amber,
+                                fontSize: 20.sp,
+                                fontWeight: FontWeight.bold,
+                              ),
                             ),
                           ),
-                        ),
-                      );
-                    },
+                        );
+                      },
+                    ),
                   ),
                   SizedBox(height: 8.h),
-                  // For Retailers text
                   Text(
                     'FOR RETAILERS',
                     style: TextStyle(
@@ -76,22 +75,12 @@ class CustomDrawer extends StatelessWidget {
 
           // Menu items
           ListTile(
-            leading: Icon(Icons.info, size: 22.w),
-            title: Text(
-              'About Us',
-              style: TextStyle(fontSize: 15.sp),
-            ),
-            onTap: () => _launchUrl('${ApiEndpoints.baseUrl}/about'),
-            contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
-          ),
-          ListTile(
             leading: Icon(Icons.phone, size: 22.w),
             title: Text(
-              'Contact Sales',
+              'Contact Us',
               style: TextStyle(fontSize: 15.sp),
             ),
-            onTap: () => _launchUrl('mailto:sales@spy-damusic.com'),
-            contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
+            onTap: () => onScreenSelected(2), // Contact Us screen
           ),
           ListTile(
             leading: Icon(Icons.library_music, size: 22.w),
@@ -99,8 +88,7 @@ class CustomDrawer extends StatelessWidget {
               'View Plans',
               style: TextStyle(fontSize: 15.sp),
             ),
-            onTap: () => _launchUrl(ApiEndpoints.retailPlans),
-            contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
+            onTap: () => onScreenSelected(3), // View Plans screen
           ),
           ListTile(
             leading: Icon(Icons.schedule, size: 22.w),
@@ -108,8 +96,7 @@ class CustomDrawer extends StatelessWidget {
               'Book Demo',
               style: TextStyle(fontSize: 15.sp),
             ),
-            onTap: () => _launchUrl(ApiEndpoints.bookDemo),
-            contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
+            onTap: () => onScreenSelected(1), // Contact screen
           ),
           const Divider(),
           ListTile(
@@ -118,8 +105,7 @@ class CustomDrawer extends StatelessWidget {
               'Privacy Policy',
               style: TextStyle(fontSize: 15.sp),
             ),
-            onTap: () => _launchUrl('${ApiEndpoints.baseUrl}/privacy-policy'),
-            contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
+            onTap: () => onScreenSelected(4), // Privacy Policy screen
           ),
           ListTile(
             leading: Icon(Icons.description, size: 22.w),
@@ -127,8 +113,7 @@ class CustomDrawer extends StatelessWidget {
               'Terms of Service',
               style: TextStyle(fontSize: 15.sp),
             ),
-            onTap: () => _launchUrl('${ApiEndpoints.baseUrl}/terms'),
-            contentPadding: EdgeInsets.symmetric(horizontal: 16.w),
+            onTap: () => onScreenSelected(5), // Terms screen
           ),
         ],
       ),

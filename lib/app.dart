@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'core/features/artists/screens/artists_screen.dart';
+import 'package:spyda_music_retailer/core/features/webpages/terms_and_conditions_screen.dart';
 import 'core/features/contact/screens/contact_screen.dart';
-import 'core/features/distribution/distribution_screen.dart';
-import 'core/features/label/screens/label_screen.dart';
+import 'core/features/home/home_screen.dart';
+import 'core/features/webpages/contact_us_screen.dart';
+import 'core/features/webpages/privacy_policy_screen.dart';
+import 'core/features/webpages/view_plans_screen.dart';
 import 'core/theme/app_theme.dart';
 import 'core/widgets/custom_drawer.dart';
 import 'core/widgets/custom_bottom_nav.dart';
@@ -19,32 +21,19 @@ class _MainAppState extends State<MainApp> {
   int _currentIndex = 0;
   bool _showSearchField = false;
   final TextEditingController _searchController = TextEditingController();
-  late List<Widget> _screens;
-  int _refreshKey = 0;
   final GlobalKey<ScaffoldState> _scaffoldKey = GlobalKey<ScaffoldState>();
 
-  @override
-  void initState() {
-    super.initState();
-    _initializeScreens();
-  }
-
-  void _initializeScreens() {
-    _screens = [
-      const LabelScreen(),
-      const ArtistsScreen(),
-      const DistributionScreen(),
-      const ContactScreen(),
-    ];
-  }
+  final List<Widget> _screens = [
+    const HomeScreen(),
+    const ViewPlansScreen(),
+    const PrivacyPolicyScreen(),
+    const TermsAndConditionsScreen(),
+    const ContactScreen(),
+  ];
 
   void _refreshCurrentScreen() {
-    setState(() {
-      _refreshKey++;
-      _initializeScreens();
-    });
+    setState(() {});
 
-    // Show snackbar using the scaffold's context
     WidgetsBinding.instance.addPostFrameCallback((_) {
       ScaffoldMessenger.of(_scaffoldKey.currentContext!).showSnackBar(
         SnackBar(
@@ -66,31 +55,20 @@ class _MainAppState extends State<MainApp> {
   }
 
   void _handleSearch(String query) {
-    switch (_currentIndex) {
-      case 0:
-        print('Searching Labels: $query');
-        break;
-      case 1:
-        print('Searching Artists: $query');
-        break;
-      case 2:
-        print('Searching Distribution: $query');
-        break;
-      case 3:
-        print('Searching Contact: $query');
-        break;
-    }
+    print('Searching ${_getScreenName()}: $query');
   }
 
   String _getScreenName() {
     switch (_currentIndex) {
       case 0:
-        return 'Labels';
+        return 'Home';
       case 1:
-        return 'Artists';
+        return 'Plans';
       case 2:
-        return 'Distribution';
+        return 'Privacy';
       case 3:
+        return 'Terms';
+      case 4:
         return 'Contact';
       default:
         return 'Screen';
@@ -109,8 +87,15 @@ class _MainAppState extends State<MainApp> {
           theme: AppTheme.lightTheme,
           debugShowCheckedModeBanner: false,
           home: Scaffold(
-            key: _scaffoldKey, // Use the global key
-            drawer: const CustomDrawer(),
+            key: _scaffoldKey,
+            drawer: CustomDrawer(
+              onScreenSelected: (index) {
+                setState(() {
+                  _currentIndex = index;
+                });
+                Navigator.pop(context);
+              },
+            ),
             appBar: PreferredSize(
               preferredSize: Size.fromHeight(kToolbarHeight),
               child: Container(
@@ -122,7 +107,6 @@ class _MainAppState extends State<MainApp> {
                 ),
                 child: Row(
                   children: [
-                    // Menu button
                     Builder(
                       builder: (context) => IconButton(
                         icon: Icon(
@@ -140,8 +124,9 @@ class _MainAppState extends State<MainApp> {
                       ),
                     ),
 
+                    // BACK BUTTON REMOVED - Lines 85-93 deleted
+
                     if (_showSearchField)
-                    // Search field
                       Expanded(
                         child: Padding(
                           padding: EdgeInsets.symmetric(horizontal: 12.w),
@@ -188,15 +173,12 @@ class _MainAppState extends State<MainApp> {
                                     : null,
                               ),
                               onChanged: _handleSearch,
-                              onSubmitted: (value) {
-                                _handleSearch(value);
-                              },
+                              onSubmitted: _handleSearch,
                             ),
                           ),
                         ),
                       )
                     else
-                    // Logo
                       Expanded(
                         child: Center(
                           child: Image.asset(
@@ -222,12 +204,10 @@ class _MainAppState extends State<MainApp> {
                         ),
                       ),
 
-                    // Action buttons
                     if (!_showSearchField)
                       Row(
                         mainAxisSize: MainAxisSize.min,
                         children: [
-                          // Search icon
                           IconButton(
                             icon: const Icon(
                               Icons.search,
@@ -255,6 +235,8 @@ class _MainAppState extends State<MainApp> {
             bottomNavigationBar: CustomBottomNav(
               currentIndex: _currentIndex,
               onTap: (index) {
+                print('Bottom nav tapped: $index');
+
                 if (_showSearchField) {
                   setState(() {
                     _showSearchField = false;
@@ -275,13 +257,15 @@ class _MainAppState extends State<MainApp> {
   String _getSearchHint() {
     switch (_currentIndex) {
       case 0:
-        return 'Search labels...';
+        return 'Search website...';
       case 1:
-        return 'Search artists...';
+        return 'Search plans...';
       case 2:
-        return 'Search distribution...';
+        return 'Search privacy...';
       case 3:
-        return 'Search contacts...';
+        return 'Search terms...';
+      case 4:
+        return 'Search contact...';
       default:
         return 'Search...';
     }

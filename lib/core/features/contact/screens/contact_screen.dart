@@ -1,12 +1,12 @@
+import 'dart:async';
 import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
-import 'package:provider/provider.dart';
+import 'package:mailer/mailer.dart';
+import 'package:mailer/smtp_server.dart';
 import 'package:url_launcher/url_launcher.dart';
-import '../../../../core/services/api_service.dart';
 import '../../../../core/theme/app_colors.dart';
 import '../../../../core/theme/app_text_styles.dart';
 import '../../../../core/utils/validators.dart';
-import '../../../../core/constants/api_endpoints.dart';
 import '../models/contact_form_model.dart';
 
 class ContactScreen extends StatefulWidget {
@@ -39,21 +39,28 @@ class _ContactScreenState extends State<ContactScreen> {
 
   // Plan options
   final List<String> _planOptions = [
-    'Starter',
-    'Growth',
-    'Premium',
-    'Not Sure',
+    'Select a plan',
+    'Retail - Basic £149.99/Year',
+    'Retail - Premium £179.99/Year',
+    'Retail - Elite £199.99/Year',
     'Custom Quote',
   ];
 
-  Future<void> _submitForm() async {
+  // SMTP Configuration - FIXED settings for your domain
+  static const String _smtpUsername = 'app-enquiry@spy-darecordings.com';
+  static const String _smtpPassword = 'Sales@123!#';
+  static const String _smtpHost = 'mail.spy-darecordings.com';
+  static const int _smtpPort = 465;
+
+  // Send email directly via SMTP
+  Future<void> _sendEmailViaSMTP() async {
     if (!_formKey.currentState!.validate()) {
       return;
     }
 
     _formKey.currentState!.save();
 
-    if (!_contactForm.validate()) {
+    if (!_contactForm.validate() || _contactForm.interestedPlan.isEmpty || _contactForm.interestedPlan == 'Select a plan') {
       setState(() {
         _submitMessage = 'Please fill in all required fields';
         _isSuccess = false;
@@ -67,38 +74,193 @@ class _ContactScreenState extends State<ContactScreen> {
     });
 
     try {
-      final apiService = ApiService();
-      final response = await apiService.postForm(
-        ApiEndpoints.contact,
-        _contactForm.toJson(),
+      // Create SMTP server with correct settings
+      final smtpServer = SmtpServer(
+        _smtpHost,
+        username: _smtpUsername,
+        password: _smtpPassword,
+        port: _smtpPort,
+        ssl: true, // Changed to true for port 465
+        allowInsecure: false, // Changed to false for security
       );
 
-      setState(() {
-        _isSubmitting = false;
-        _isSuccess = response['ok'] == true;
-        _submitMessage = response['message'] ?? response['error'] ?? 'Submission completed';
+      // Create HTML email
+      final htmlMessage = _createHtmlEmail();
 
-        if (_isSuccess) {
-          // Clear form on success
-          _formKey.currentState!.reset();
-          _contactForm.businessName = '';
-          _contactForm.contactName = '';
-          _contactForm.email = '';
-          _contactForm.phone = '';
-          _contactForm.businessType = '';
-          _contactForm.locations = 1;
-          _contactForm.interestedPlan = '';
-          _contactForm.message = '';
-          _contactForm.requestCallback = false;
-        }
-      });
-    } catch (e) {
+      // Create plain text version
+      final textMessage = _createTextEmail();
+
+      // Create the email message
+      final message = Message()
+        ..from = Address(_smtpUsername, 'Spy-da Recordings Contact Form')
+        ..recipients.addAll([
+          'sales@spy-darecordings.com',
+          'bobby@spy-darecordings.com',
+          'zak@spy-damusicgroup.com'
+        ])
+        ..subject = 'New Contact Form: ${_contactForm.businessName}'
+        ..text = textMessage
+        ..html = htmlMessage;
+
+      // Send the email with timeout
+      final sendReport = await send(message, smtpServer)
+          .timeout(Duration(seconds: 30));
+
+      // Check if email was sent successfully
+      if (sendReport != null) {
+        setState(() {
+          _isSubmitting = false;
+          _isSuccess = true;
+          _submitMessage = 'Thank you! Your message has been sent successfully. Our team will contact you within 24 hours.';
+        });
+
+        // Clear form
+        _resetForm();
+      } else {
+        setState(() {
+          _isSubmitting = false;
+          _isSuccess = false;
+          _submitMessage = 'Failed to send email. Please try again.';
+        });
+      }
+    } on TimeoutException catch (_) {
       setState(() {
         _isSubmitting = false;
         _isSuccess = false;
-        _submitMessage = 'Failed to submit form. Please try again.';
+        _submitMessage = 'Connection timeout. Please check your internet connection and try again.';
+      });
+    } catch (e) {
+      print('Email sending error: $e');
+      setState(() {
+        _isSubmitting = false;
+        _isSuccess = false;
+        _submitMessage = 'Email sending failed. Please try again.';
       });
     }
+  }
+
+  String _createHtmlEmail() {
+    return """
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>New Contact Form Submission</title>
+    <style>
+        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
+        .header { background-color: #d32f2f; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
+        .content { border: 1px solid #ddd; border-top: none; padding: 20px; border-radius: 0 0 5px 5px; }
+        .section { margin-bottom: 20px; padding-bottom: 15px; border-bottom: 1px solid #eee; }
+        .section:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .label { font-weight: bold; color: #d32f2f; margin-bottom: 5px; display: block; }
+        .value { margin-bottom: 10px; padding-left: 15px; }
+        .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #ddd; font-size: 12px; color: #666; text-align: center; }
+        .plan-badge { display: inline-block; background-color: #4CAF50; color: white; padding: 5px 10px; border-radius: 3px; font-weight: bold; margin-top: 5px; }
+        .callback-badge { display: inline-block; background-color: #2196F3; color: white; padding: 5px 10px; border-radius: 3px; font-weight: bold; margin-top: 5px; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>New Contact Form Submission</h1>
+        <p>Spy-da Recordings Contact Form</p>
+    </div>
+    
+    <div class="content">
+        <div class="section">
+            <span class="label">BUSINESS INFORMATION</span>
+            <div class="value">
+                <strong>Business Name:</strong> ${_contactForm.businessName}<br>
+                <strong>Contact Name:</strong> ${_contactForm.contactName}<br>
+                <strong>Email:</strong> ${_contactForm.email}<br>
+                <strong>Phone:</strong> ${_contactForm.phone.isNotEmpty ? _contactForm.phone : 'Not provided'}<br>
+                <strong>Business Type:</strong> ${_contactForm.businessType}<br>
+                <strong>Number of Locations:</strong> ${_contactForm.locations}
+            </div>
+        </div>
+        
+        <div class="section">
+            <span class="label">PLAN INTEREST</span>
+            <div class="value">
+                <div class="plan-badge">${_contactForm.interestedPlan}</div><br>
+                <strong>Callback Requested:</strong> 
+                ${_contactForm.requestCallback ? '<span class="callback-badge">YES - Please Call Back</span>' : 'No'}
+            </div>
+        </div>
+        
+        ${_contactForm.message.isNotEmpty ? '''
+        <div class="section">
+            <span class="label">MESSAGE</span>
+            <div class="value">
+                ${_contactForm.message.replaceAll('\n', '<br>')}
+            </div>
+        </div>
+        ''' : ''}
+        
+        <div class="section">
+            <span class="label">SUBMISSION DETAILS</span>
+            <div class="value">
+                <strong>Submitted via:</strong> Spy-da Recordings Mobile App<br>
+                <strong>Submission Time:</strong> ${DateTime.now().toString()}<br>
+                <strong>IP Address:</strong> N/A (Mobile App)
+            </div>
+        </div>
+    </div>
+    
+    <div class="footer">
+        <p>This email was automatically generated from the Spy-da Recordings contact form.</p>
+        <p>© ${DateTime.now().year} Spy-da Recordings. All rights reserved.</p>
+    </div>
+</body>
+</html>
+""";
+  }
+
+  String _createTextEmail() {
+    return """
+NEW CONTACT FORM SUBMISSION
+===========================
+
+BUSINESS INFORMATION:
+• Business Name: ${_contactForm.businessName}
+• Contact Name: ${_contactForm.contactName}
+• Email: ${_contactForm.email}
+• Phone: ${_contactForm.phone.isNotEmpty ? _contactForm.phone : 'Not provided'}
+• Business Type: ${_contactForm.businessType}
+• Number of Locations: ${_contactForm.locations}
+
+PLAN INTEREST:
+• Selected Plan: ${_contactForm.interestedPlan}
+• Callback Requested: ${_contactForm.requestCallback ? 'YES - Please Call Back' : 'No'}
+
+${_contactForm.message.isNotEmpty ? '''
+MESSAGE:
+${_contactForm.message}
+''' : ''}
+
+SUBMISSION DETAILS:
+• Submitted via: Spy-da Recordings Mobile App
+• Submission Time: ${DateTime.now().toString()}
+• IP Address: N/A (Mobile App)
+
+===========================
+Automatically generated from Spy-da Recordings contact form.
+""";
+  }
+
+  void _resetForm() {
+    _formKey.currentState?.reset();
+    setState(() {
+      _contactForm.businessName = '';
+      _contactForm.contactName = '';
+      _contactForm.email = '';
+      _contactForm.phone = '';
+      _contactForm.businessType = '';
+      _contactForm.locations = 1;
+      _contactForm.interestedPlan = '';
+      _contactForm.message = '';
+      _contactForm.requestCallback = false;
+    });
   }
 
   @override
@@ -123,45 +285,6 @@ class _ContactScreenState extends State<ContactScreen> {
             ),
           ),
           SizedBox(height: 32.h),
-
-          // Success/Error Message
-          if (_submitMessage != null)
-            Container(
-              padding: EdgeInsets.all(16.w),
-              margin: EdgeInsets.only(bottom: 16.h),
-              decoration: BoxDecoration(
-                color: _isSuccess
-                    ? AppColors.successColor.withOpacity(0.1)
-                    : AppColors.errorColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(8.r),
-                border: Border.all(
-                  color: _isSuccess
-                      ? AppColors.successColor.withOpacity(0.3)
-                      : AppColors.errorColor.withOpacity(0.3),
-                ),
-              ),
-              child: Row(
-                children: [
-                  Icon(
-                    _isSuccess ? Icons.check_circle : Icons.error,
-                    color: _isSuccess
-                        ? AppColors.successColor
-                        : AppColors.errorColor,
-                  ),
-                  SizedBox(width: 12.w),
-                  Expanded(
-                    child: Text(
-                      _submitMessage!,
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        color: _isSuccess
-                            ? AppColors.successColor
-                            : AppColors.errorColor,
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-            ),
 
           // Form
           Form(
@@ -262,11 +385,17 @@ class _ContactScreenState extends State<ContactScreen> {
                 ),
                 SizedBox(height: 16.h),
 
-                // Interested Plan
+                // Interested Plan dropdown
                 _buildDropdown(
-                  label: 'Interested Plan',
+                  label: 'Interested Plan *',
                   value: _contactForm.interestedPlan,
                   items: _planOptions,
+                  validator: (value) {
+                    if (value == null || value.isEmpty || value == 'Select a plan') {
+                      return 'Please select a plan';
+                    }
+                    return null;
+                  },
                   onChanged: (value) {
                     setState(() {
                       _contactForm.interestedPlan = value ?? '';
@@ -275,11 +404,30 @@ class _ContactScreenState extends State<ContactScreen> {
                 ),
                 SizedBox(height: 16.h),
 
-                // Message
-                _buildTextArea(
-                  label: 'Message (Optional)',
-                  hint: 'Tell us about your music needs or ask any questions...',
-                  onSaved: (value) => _contactForm.message = value ?? '',
+                // Message field
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Message (Optional)',
+                      style: AppTextStyles.bodyMedium.copyWith(
+                        fontWeight: FontWeight.w500,
+                      ),
+                    ),
+                    SizedBox(height: 4.h),
+                    TextFormField(
+                      decoration: InputDecoration(
+                        hintText: 'Tell us about your needs or ask any questions...',
+                        border: OutlineInputBorder(
+                          borderRadius: BorderRadius.circular(8.r),
+                        ),
+                        alignLabelWithHint: true,
+                      ),
+                      maxLines: 4,
+                      keyboardType: TextInputType.multiline,
+                      onSaved: (value) => _contactForm.message = value ?? '',
+                    ),
+                  ],
                 ),
                 SizedBox(height: 16.h),
 
@@ -309,7 +457,7 @@ class _ContactScreenState extends State<ContactScreen> {
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    onPressed: _isSubmitting ? null : _submitForm,
+                    onPressed: _isSubmitting ? null : _sendEmailViaSMTP,
                     style: ElevatedButton.styleFrom(
                       backgroundColor: AppColors.primaryColor,
                       foregroundColor: Colors.white,
@@ -330,6 +478,46 @@ class _ContactScreenState extends State<ContactScreen> {
                     ),
                   ),
                 ),
+
+                // Success/Error Message - MOVED BELOW SUBMIT BUTTON
+                SizedBox(height: 16.h),
+                if (_submitMessage != null)
+                  Container(
+                    padding: EdgeInsets.all(16.w),
+                    decoration: BoxDecoration(
+                      color: _isSuccess
+                          ? AppColors.successColor.withOpacity(0.1)
+                          : AppColors.errorColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(8.r),
+                      border: Border.all(
+                        color: _isSuccess
+                            ? AppColors.successColor.withOpacity(0.3)
+                            : AppColors.errorColor.withOpacity(0.3),
+                      ),
+                    ),
+                    child: Row(
+                      children: [
+                        Icon(
+                          _isSuccess ? Icons.check_circle : Icons.error,
+                          color: _isSuccess
+                              ? AppColors.successColor
+                              : AppColors.errorColor,
+                        ),
+                        SizedBox(width: 12.w),
+                        Expanded(
+                          child: Text(
+                            _submitMessage!,
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              color: _isSuccess
+                                  ? AppColors.successColor
+                                  : AppColors.errorColor,
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
+
                 SizedBox(height: 16.h),
 
                 // Note
@@ -342,7 +530,51 @@ class _ContactScreenState extends State<ContactScreen> {
                 SizedBox(height: 32.h),
 
                 // Contact Info
-                _buildContactInfo(),
+                Card(
+                  child: Padding(
+                    padding: EdgeInsets.all(16.w),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Prefer to contact us directly?',
+                          style: AppTextStyles.titleMedium.copyWith(
+                            color: AppColors.primaryColor,
+                          ),
+                        ),
+                        SizedBox(height: 12.h),
+                        ListTile(
+                          leading: Icon(
+                            Icons.email,
+                            color: AppColors.accentColor,
+                          ),
+                          title: Text(
+                            'Email',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          subtitle: Text('info@spy-darecordings.com'),
+                          onTap: () => _launchSimpleEmail('info@spy-darecordings.com'),
+                        ),
+                        ListTile(
+                          leading: Icon(
+                            Icons.phone,
+                            color: AppColors.accentColor,
+                          ),
+                          title: Text(
+                            'Phone',
+                            style: AppTextStyles.bodyMedium.copyWith(
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                          subtitle: Text('+44 (0)0207 101 4363'),
+                          onTap: () => _launchUrl('tel:+4402071014363'),
+                        ),
+                      ],
+                    ),
+                  ),
+                ),
               ],
             ),
           ),
@@ -383,36 +615,6 @@ class _ContactScreenState extends State<ContactScreen> {
     );
   }
 
-  Widget _buildTextArea({
-    required String label,
-    required String hint,
-    void Function(String?)? onSaved,
-  }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: AppTextStyles.bodyMedium.copyWith(
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        SizedBox(height: 4.h),
-        TextFormField(
-          decoration: InputDecoration(
-            hintText: hint,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.r),
-            ),
-            alignLabelWithHint: true,
-          ),
-          maxLines: 4,
-          onSaved: onSaved,
-        ),
-      ],
-    );
-  }
-
   Widget _buildDropdown({
     required String label,
     required String value,
@@ -438,21 +640,17 @@ class _ContactScreenState extends State<ContactScreen> {
             ),
             hintText: 'Select $label',
           ),
-          items: [
-            DropdownMenuItem<String>(
-              value: '',
+          items: items.map((item) {
+            return DropdownMenuItem<String>(
+              value: item == 'Select a plan' ? '' : item,
               child: Text(
-                'Select $label',
-                style: TextStyle(color: AppColors.textSecondary),
+                item,
+                style: TextStyle(
+                  color: item == 'Select a plan' ? AppColors.textSecondary : null,
+                ),
               ),
-            ),
-            ...items.map((item) {
-              return DropdownMenuItem<String>(
-                value: item,
-                child: Text(item),
-              );
-            }).toList(),
-          ],
+            );
+          }).toList(),
           validator: validator,
           onChanged: onChanged,
         ),
@@ -493,71 +691,28 @@ class _ContactScreenState extends State<ContactScreen> {
     );
   }
 
-  Widget _buildContactInfo() {
-    return Card(
-      child: Padding(
-        padding: EdgeInsets.all(16.w),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            Text(
-              'Prefer to contact us directly?',
-              style: AppTextStyles.titleMedium.copyWith(
-                color: AppColors.primaryColor,
-              ),
-            ),
-            SizedBox(height: 12.h),
-            ListTile(
-              leading: Icon(
-                Icons.email,
-                color: AppColors.accentColor,
-              ),
-              title: Text(
-                'Email',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              subtitle: Text('support@spy-damusic.com'),
-              onTap: () => _launchUrl('mailto:support@spy-damusic.com'),
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.phone,
-                color: AppColors.accentColor,
-              ),
-              title: Text(
-                'Phone',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              subtitle: Text('+44 XXXXXXXX'),
-              onTap: () => _launchUrl('tel:+44XXXXXXXXXX'),
-            ),
-            ListTile(
-              leading: Icon(
-                Icons.calendar_today,
-                color: AppColors.accentColor,
-              ),
-              title: Text(
-                'Book a Demo',
-                style: AppTextStyles.bodyMedium.copyWith(
-                  fontWeight: FontWeight.w500,
-                ),
-              ),
-              subtitle: Text('Schedule a personalized demo'),
-              onTap: () => _launchUrl(ApiEndpoints.bookDemo),
-            ),
-          ],
-        ),
-      ),
-    );
+  Future<void> _launchUrl(String url) async {
+    try {
+      if (await canLaunchUrl(Uri.parse(url))) {
+        await launchUrl(Uri.parse(url));
+      }
+    } catch (e) {
+      // Silently fail
+    }
   }
 
-  Future<void> _launchUrl(String url) async {
-    if (await canLaunchUrl(Uri.parse(url))) {
-      await launchUrl(Uri.parse(url));
+  Future<void> _launchSimpleEmail(String recipient) async {
+    try {
+      final uri = Uri(
+        scheme: 'mailto',
+        path: recipient,
+      ).toString();
+
+      if (await canLaunchUrl(Uri.parse(uri))) {
+        await launchUrl(Uri.parse(uri));
+      }
+    } catch (e) {
+      // Silently fail
     }
   }
 }
