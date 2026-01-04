@@ -173,7 +173,7 @@ class CustomDrawer extends StatelessWidget {
                 mainAxisSize: MainAxisSize.min,
                 children: [
                   Text(
-                    '© ${DateTime.now().year} Spy-Da Recordings',
+                    '© ${DateTime.now().year} Spy-da Recordings',
                     style: TextStyle(
                       color: Colors.white60,
                       fontSize: 13.sp,

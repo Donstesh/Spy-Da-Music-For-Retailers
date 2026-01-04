@@ -45,7 +45,7 @@ class _HomeScreenState extends State<HomeScreen> {
     {
       'name': 'DJ Prodigy',
       'role': 'Electronic Artist',
-      'text': 'Spy-Da helped me reach global audiences. Professional service!',
+      'text': 'Spy-da helped me reach global audiences. Professional service!',
     },
     {
       'name': 'Retail Chain UK',
@@ -250,7 +250,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     crossAxisAlignment: CrossAxisAlignment.center,
                     children: [
                       Text(
-                        'Welcome to Spy-Da Recordings',
+                        'Welcome to Spy-da Recordings',
                         style: AppTextStyles.headlineLarge.copyWith(
                           color: Colors.white,
                           fontSize: constraints.maxWidth > 600 ? 28.sp : 24.sp,
@@ -764,7 +764,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       SizedBox(height: 6.h),
                       Text(
-                        'Join thousands of artists and retailers using Spy-Da Recordings',
+                        'Join thousands of artists and retailers using Spy-da Recordings',
                         style: AppTextStyles.bodyLarge.copyWith(
                           color: Colors.white70,
                           fontSize: constraints.maxWidth > 600 ? 16.sp : 14.sp,
@@ -924,7 +924,7 @@ class _HomeScreenState extends State<HomeScreen> {
                       ),
                       SizedBox(height: 14.h),
                       Text(
-                        '© $_currentYear Spy-Da Recordings. All rights reserved.',
+                        '© $_currentYear Spy-da Recordings. All rights reserved.',
                         style: AppTextStyles.caption.copyWith(
                           color: Colors.white30,
                           fontSize: constraints.maxWidth > 600 ? 14.sp : 12.sp,

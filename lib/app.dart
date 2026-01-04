@@ -81,7 +81,7 @@ class _MainAppState extends State<MainApp> {
       splitScreenMode: true,
       builder: (_, child) {
         return MaterialApp(
-          title: 'Spy-Da Music Retailer',
+          title: 'Spy-da Music Retailer',
           theme: AppTheme.lightTheme,
           debugShowCheckedModeBanner: false,
           home: Scaffold(

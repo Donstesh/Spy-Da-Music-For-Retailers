@@ -26,7 +26,7 @@ class MyApp extends StatelessWidget {
       splitScreenMode: true,
       builder: (_, child) {
         return MaterialApp(
-          title: 'Spy-Da Music Retailer',
+          title: 'Spy-da Music Retailer',
           theme: ThemeData(
             primarySwatch: Colors.blue,
           ),

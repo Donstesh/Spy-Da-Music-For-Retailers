@@ -15,7 +15,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
     {
       'title': 'Introduction',
       'content':
-      'Spy-Da Recordings is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our services.',
+      'Spy-da Recordings is committed to protecting your privacy. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you use our services.',
       'icon': Icons.security,
     },
     {
@@ -192,7 +192,7 @@ class _PrivacyPolicyScreenState extends State<PrivacyPolicyScreen> {
                               ),
                               SizedBox(height: 12.h),
                               Text(
-                                'Spy-Da Recordings Privacy Policy',
+                                'Spy-da Recordings Privacy Policy',
                                 style: AppTextStyles.headlineLarge.copyWith(
                                   color: Colors.white,
                                   fontSize: constraints.maxWidth > 600 ? 22.sp : 18.sp,

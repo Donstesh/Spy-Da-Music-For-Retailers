@@ -15,13 +15,13 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
     {
       'title': 'Retailer Agreement',
       'content':
-      'This Retailer Agreement ("Agreement") governs your use of Spy-Da Recordings retail music services. By subscribing to our services, you agree to be bound by these terms.',
+      'This Retailer Agreement ("Agreement") governs your use of Spy-da Recordings retail music services. By subscribing to our services, you agree to be bound by these terms.',
       'icon': Icons.handshake,
     },
     {
       'title': 'Service Description',
       'content':
-      'Spy-Da Recordings provides background music services for retail establishments including curated playlists, commercial licensing, and regular updates based on your subscription tier.',
+      'Spy-da Recordings provides background music services for retail establishments including curated playlists, commercial licensing, and regular updates based on your subscription tier.',
       'icon': Icons.music_note,
     },
     {
@@ -75,7 +75,7 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
     {
       'title': 'Liability Limitations',
       'content':
-      'Spy-Da Recordings shall not be liable for any indirect, incidental, or consequential damages. Our total liability shall not exceed the amount paid for your subscription in the last 12 months.',
+      'Spy-da Recordings shall not be liable for any indirect, incidental, or consequential damages. Our total liability shall not exceed the amount paid for your subscription in the last 12 months.',
       'icon': Icons.warning,
     },
     {
@@ -260,7 +260,7 @@ class _TermsAndConditionsScreenState extends State<TermsAndConditionsScreen> {
                         ),
                         SizedBox(height: 20.h),
                         Text(
-                          'This agreement applies specifically to retail businesses subscribing to Spy-Da Recordings background music services.',
+                          'This agreement applies specifically to retail businesses subscribing to Spy-da Recordings background music services.',
                           style: AppTextStyles.bodyMedium.copyWith(
                             color: Colors.white70,
                             fontSize: constraints.maxWidth > 600 ? 14.sp : 12.sp,
