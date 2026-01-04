@@ -118,9 +118,9 @@ class _AppLoaderState extends State<AppLoader> {
                 // Add "FOR RETAILERS" text here
                 SizedBox(height: 10.h), // Add some spacing
                 Text(
-                  'FOR RETAILERS',
+                  'FOR ARTISTS & RETAILERS',
                   style: TextStyle(
-                    color: Colors.red,
+                    color: Colors.white,
                     fontSize: 16.sp,
                     fontWeight: FontWeight.bold,
                     letterSpacing: 1.2,
@@ -138,7 +138,7 @@ class _AppLoaderState extends State<AppLoader> {
                     ),
                   ),
                   child: Text(
-                    'v1.0.0',
+                    'v1.0.1',
                     style: TextStyle(
                       color: Colors.white.withOpacity(0.9),
                       fontSize: 15.sp,

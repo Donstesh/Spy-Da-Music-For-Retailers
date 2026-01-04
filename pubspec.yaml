@@ -1,6 +1,6 @@
 name: spyda_music_retailer
 description: Spy-da Music Retailer App
-version: 1.0.0+1
+version: 1.0.1+1
 
 environment:
   sdk: ^3.9.2

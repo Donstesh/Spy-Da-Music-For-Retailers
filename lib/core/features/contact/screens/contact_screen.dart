@@ -554,7 +554,7 @@ Automatically generated from Spy-da Recordings contact form.
                             ),
                           ),
                           subtitle: Text('info@spy-darecordings.com'),
-                          onTap: () => _launchSimpleEmail('info@spy-darecordings.com'),
+                          onTap: () => _launchSimpleEmail('info@spy-damusic.com'),
                         ),
                         ListTile(
                           leading: Icon(
@@ -567,7 +567,7 @@ Automatically generated from Spy-da Recordings contact form.
                               fontWeight: FontWeight.w500,
                             ),
                           ),
-                          subtitle: Text('+44 (0)0207 101 4363'),
+                          subtitle: Text('+44 (0) 207 101 4363'),
                           onTap: () => _launchUrl('tel:+4402071014363'),
                         ),
                       ],

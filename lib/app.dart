@@ -3,7 +3,6 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:spyda_music_retailer/core/features/webpages/terms_and_conditions_screen.dart';
 import 'core/features/contact/screens/contact_screen.dart';
 import 'core/features/home/home_screen.dart';
-import 'core/features/webpages/contact_us_screen.dart';
 import 'core/features/webpages/privacy_policy_screen.dart';
 import 'core/features/webpages/view_plans_screen.dart';
 import 'core/theme/app_theme.dart';
@@ -55,7 +54,6 @@ class _MainAppState extends State<MainApp> {
   }
 
   void _handleSearch(String query) {
-    print('Searching ${_getScreenName()}: $query');
   }
 
   String _getScreenName() {
@@ -235,8 +233,6 @@ class _MainAppState extends State<MainApp> {
             bottomNavigationBar: CustomBottomNav(
               currentIndex: _currentIndex,
               onTap: (index) {
-                print('Bottom nav tapped: $index');
-
                 if (_showSearchField) {
                   setState(() {
                     _showSearchField = false;

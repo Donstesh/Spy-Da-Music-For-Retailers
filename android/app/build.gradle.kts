@@ -12,9 +12,9 @@ android {
     // 🔥 CORRECT PLACEMENT: Move signingConfigs OUTSIDE compileOptions
     signingConfigs {
         create("release") {
-            storeFile = file("E:/stesh/apk_key/spyda_music.jks")
+            storeFile = file("E:/stesh/apk_key/spy_da_recordings_key.jks")
             storePassword = "steshdev"
-            keyAlias = "upload"
+            keyAlias = "spy_da_recordings_alias"
             keyPassword = "steshdev"
         }
     }
