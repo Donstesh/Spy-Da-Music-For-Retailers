@@ -23,7 +23,6 @@ class _ContactScreenState extends State<ContactScreen> {
   String? _submitMessage;
   bool _isSuccess = false;
 
-  // Business type options
   final List<String> _businessTypes = [
     'Barbers',
     'Gym',
@@ -37,7 +36,6 @@ class _ContactScreenState extends State<ContactScreen> {
     'Other',
   ];
 
-  // Plan options
   final List<String> _planOptions = [
     'Select a plan',
     'Retail - Basic £149.99/Year',
@@ -46,13 +44,11 @@ class _ContactScreenState extends State<ContactScreen> {
     'Custom Quote',
   ];
 
-  // SMTP Configuration - FIXED settings for your domain
   static const String _smtpUsername = 'app-enquiry@spy-darecordings.com';
   static const String _smtpPassword = 'Sales@123!#';
   static const String _smtpHost = 'mail.spy-darecordings.com';
   static const int _smtpPort = 465;
 
-  // Send email directly via SMTP
   Future<void> _sendEmailViaSMTP() async {
     if (!_formKey.currentState!.validate()) {
       return;
@@ -74,23 +70,18 @@ class _ContactScreenState extends State<ContactScreen> {
     });
 
     try {
-      // Create SMTP server with correct settings
       final smtpServer = SmtpServer(
         _smtpHost,
         username: _smtpUsername,
         password: _smtpPassword,
         port: _smtpPort,
-        ssl: true, // Changed to true for port 465
-        allowInsecure: false, // Changed to false for security
+        ssl: true,
+        allowInsecure: false,
       );
 
-      // Create HTML email
       final htmlMessage = _createHtmlEmail();
-
-      // Create plain text version
       final textMessage = _createTextEmail();
 
-      // Create the email message
       final message = Message()
         ..from = Address(_smtpUsername, 'Spy-da Recordings')
         ..recipients.addAll([
@@ -102,19 +93,15 @@ class _ContactScreenState extends State<ContactScreen> {
         ..text = textMessage
         ..html = htmlMessage;
 
-      // Send the email with timeout
       final sendReport = await send(message, smtpServer)
           .timeout(Duration(seconds: 30));
 
-      // Check if email was sent successfully
       if (sendReport != null) {
         setState(() {
           _isSubmitting = false;
           _isSuccess = true;
           _submitMessage = 'Thank you! Your message has been sent successfully. Our team will contact you within 24 hours.';
         });
-
-        // Clear form
         _resetForm();
       } else {
         setState(() {
@@ -146,7 +133,7 @@ class _ContactScreenState extends State<ContactScreen> {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Spy-Da Music Prouction</title>
+    <title>Spy-da Music Prouction</title>
     <style>
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; max-width: 600px; margin: 0 auto; padding: 20px; }
         .header { background-color: #d32f2f; color: white; padding: 20px; text-align: center; border-radius: 5px 5px 0 0; }
@@ -209,7 +196,6 @@ class _ContactScreenState extends State<ContactScreen> {
     <div class="footer">
         <p>This email was automatically generated from the Spy-da Recordings contact form.</p>
         <p>© ${DateTime.now().year} Spy-da Recordings. All rights reserved.</p>
-    </div>
 </body>
 </html>
 """;
@@ -264,325 +250,571 @@ Automatically generated from Spy-da Recordings contact form.
 
   @override
   Widget build(BuildContext context) {
-    return SingleChildScrollView(
-      padding: EdgeInsets.all(16.w),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          // Header
-          Text(
-            'Get in Touch',
-            style: AppTextStyles.headlineLarge.copyWith(
-              color: AppColors.primaryColor,
-            ),
-          ),
-          SizedBox(height: 8.h),
-          Text(
-            'Fill out the form below and our team will contact you within 24 hours.',
-            style: AppTextStyles.bodyLarge.copyWith(
-              color: AppColors.textSecondary,
-            ),
-          ),
-          SizedBox(height: 32.h),
-
-          // Form
-          Form(
-            key: _formKey,
-            child: Column(
-              children: [
-                // Business Name
-                _buildFormField(
-                  label: 'Business Name *',
-                  hint: 'Enter your business name',
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your business name';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) => _contactForm.businessName = value ?? '',
-                ),
-                SizedBox(height: 16.h),
-
-                // Contact Name
-                _buildFormField(
-                  label: 'Contact Name *',
-                  hint: 'Enter your name',
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your name';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) => _contactForm.contactName = value ?? '',
-                ),
-                SizedBox(height: 16.h),
-
-                // Email
-                _buildFormField(
-                  label: 'Email Address *',
-                  hint: 'Enter your email',
-                  keyboardType: TextInputType.emailAddress,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please enter your email';
-                    }
-                    if (!Validators.isValidEmail(value)) {
-                      return 'Please enter a valid email';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) => _contactForm.email = value ?? '',
-                ),
-                SizedBox(height: 16.h),
-
-                // Phone
-                _buildFormField(
-                  label: 'Phone Number',
-                  hint: 'Enter your phone number',
-                  keyboardType: TextInputType.phone,
-                  validator: (value) {
-                    if (value != null && value.isNotEmpty) {
-                      if (!Validators.isValidPhone(value)) {
-                        return 'Please enter a valid phone number';
-                      }
-                    }
-                    return null;
-                  },
-                  onSaved: (value) => _contactForm.phone = value ?? '',
-                ),
-                SizedBox(height: 16.h),
-
-                // Business Type Dropdown
-                _buildDropdown(
-                  label: 'Business Type *',
-                  value: _contactForm.businessType,
-                  items: _businessTypes,
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Please select your business type';
-                    }
-                    return null;
-                  },
-                  onChanged: (value) {
-                    setState(() {
-                      _contactForm.businessType = value ?? '';
-                    });
-                  },
-                ),
-                SizedBox(height: 16.h),
-
-                // Number of Locations
-                _buildNumberField(
-                  label: 'Number of Locations',
-                  value: _contactForm.locations,
-                  onChanged: (value) {
-                    setState(() {
-                      _contactForm.locations = value ?? 1;
-                    });
-                  },
-                ),
-                SizedBox(height: 16.h),
-
-                // Interested Plan dropdown
-                _buildDropdown(
-                  label: 'Interested Plan *',
-                  value: _contactForm.interestedPlan,
-                  items: _planOptions,
-                  validator: (value) {
-                    if (value == null || value.isEmpty || value == 'Select a plan') {
-                      return 'Please select a plan';
-                    }
-                    return null;
-                  },
-                  onChanged: (value) {
-                    setState(() {
-                      _contactForm.interestedPlan = value ?? '';
-                    });
-                  },
-                ),
-                SizedBox(height: 16.h),
-
-                // Message field
-                Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'Message (Optional)',
-                      style: AppTextStyles.bodyMedium.copyWith(
-                        fontWeight: FontWeight.w500,
-                      ),
+    return Scaffold(
+      backgroundColor: Colors.black,
+      body: LayoutBuilder(
+        builder: (context, constraints) {
+          return CustomScrollView(
+            slivers: [
+              SliverAppBar(
+                backgroundColor: Colors.black,
+                expandedHeight: constraints.maxHeight * 0.2,
+                floating: false,
+                pinned: true,
+                flexibleSpace: FlexibleSpaceBar(
+                  centerTitle: true,
+                  titlePadding: EdgeInsets.only(bottom: 16.h),
+                  title: Container(
+                    padding: EdgeInsets.symmetric(
+                      horizontal: 16.w,
+                      vertical: 8.h,
                     ),
-                    SizedBox(height: 4.h),
-                    TextFormField(
-                      decoration: InputDecoration(
-                        hintText: 'Tell us about your needs or ask any questions...',
-                        border: OutlineInputBorder(
-                          borderRadius: BorderRadius.circular(8.r),
-                        ),
-                        alignLabelWithHint: true,
-                      ),
-                      maxLines: 4,
-                      keyboardType: TextInputType.multiline,
-                      onSaved: (value) => _contactForm.message = value ?? '',
-                    ),
-                  ],
-                ),
-                SizedBox(height: 16.h),
-
-                // Request Callback Checkbox
-                Row(
-                  children: [
-                    Checkbox(
-                      value: _contactForm.requestCallback,
-                      onChanged: (value) {
-                        setState(() {
-                          _contactForm.requestCallback = value ?? false;
-                        });
-                      },
-                      activeColor: AppColors.primaryColor,
-                    ),
-                    Expanded(
-                      child: Text(
-                        'Request a callback from our sales team',
-                        style: AppTextStyles.bodyMedium,
-                      ),
-                    ),
-                  ],
-                ),
-                SizedBox(height: 32.h),
-
-                // Submit Button
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    onPressed: _isSubmitting ? null : _sendEmailViaSMTP,
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppColors.primaryColor,
-                      foregroundColor: Colors.white,
-                      padding: EdgeInsets.symmetric(vertical: 16.h),
-                    ),
-                    child: _isSubmitting
-                        ? SizedBox(
-                      width: 24.w,
-                      height: 24.w,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        color: Colors.white,
-                      ),
-                    )
-                        : Text(
-                      'Submit Enquiry',
-                      style: AppTextStyles.button,
-                    ),
-                  ),
-                ),
-
-                // Success/Error Message - MOVED BELOW SUBMIT BUTTON
-                SizedBox(height: 16.h),
-                if (_submitMessage != null)
-                  Container(
-                    padding: EdgeInsets.all(16.w),
                     decoration: BoxDecoration(
-                      color: _isSuccess
-                          ? AppColors.successColor.withOpacity(0.1)
-                          : AppColors.errorColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(8.r),
-                      border: Border.all(
-                        color: _isSuccess
-                            ? AppColors.successColor.withOpacity(0.3)
-                            : AppColors.errorColor.withOpacity(0.3),
+                      color: Colors.black.withOpacity(0.7),
+                      borderRadius: BorderRadius.circular(20.r),
+                    ),
+                    child: Text(
+                      'CONTACT US',
+                      style: AppTextStyles.headlineLarge.copyWith(
+                        color: Colors.white,
+                        fontSize: constraints.maxWidth > 600 ? 18.sp : 16.sp,
+                        fontWeight: FontWeight.w900,
+                        letterSpacing: 1.0,
+                      ),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
+                  background: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topCenter,
+                        end: Alignment.bottomCenter,
+                        colors: [
+                          Colors.black,
+                          Colors.black.withOpacity(0.7),
+                        ],
                       ),
                     ),
-                    child: Row(
-                      children: [
-                        Icon(
-                          _isSuccess ? Icons.check_circle : Icons.error,
-                          color: _isSuccess
-                              ? AppColors.successColor
-                              : AppColors.errorColor,
-                        ),
-                        SizedBox(width: 12.w),
-                        Expanded(
-                          child: Text(
-                            _submitMessage!,
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              color: _isSuccess
-                                  ? AppColors.successColor
-                                  : AppColors.errorColor,
-                            ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-
-                SizedBox(height: 16.h),
-
-                // Note
-                Text(
-                  '* Required fields',
-                  style: AppTextStyles.caption.copyWith(
-                    color: AppColors.textSecondary,
-                  ),
-                ),
-                SizedBox(height: 32.h),
-
-                // Contact Info
-                Card(
-                  child: Padding(
-                    padding: EdgeInsets.all(16.w),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Prefer to contact us directly?',
-                          style: AppTextStyles.titleMedium.copyWith(
-                            color: AppColors.primaryColor,
-                          ),
-                        ),
-                        SizedBox(height: 12.h),
-                        ListTile(
-                          leading: Icon(
-                            Icons.email,
-                            color: AppColors.accentColor,
-                          ),
-                          title: Text(
-                            'Email',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          subtitle: Text('info@spy-darecordings.com'),
-                          onTap: () => _launchSimpleEmail('info@spy-damusic.com'),
-                        ),
-                        ListTile(
-                          leading: Icon(
-                            Icons.phone,
-                            color: AppColors.accentColor,
-                          ),
-                          title: Text(
-                            'Phone',
-                            style: AppTextStyles.bodyMedium.copyWith(
-                              fontWeight: FontWeight.w500,
-                            ),
-                          ),
-                          subtitle: Text('+44 (0) 207 101 4363'),
-                          onTap: () => _launchUrl('tel:+4402071014363'),
-                        ),
-                      ],
+                    child: Center(
+                      child: Icon(
+                        Icons.contact_mail,
+                        size: 80.sp,
+                        color: AppColors.pureRed,
+                      ),
                     ),
                   ),
                 ),
-              ],
-            ),
-          ),
-        ],
+              ),
+
+              SliverToBoxAdapter(
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: constraints.maxWidth > 600 ? 32.w : 16.w,
+                    vertical: 20.h,
+                  ),
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.center,
+                    children: [
+                      Text(
+                        'Get in Touch',
+                        style: AppTextStyles.headlineLarge.copyWith(
+                          color: Colors.white,
+                          fontSize: constraints.maxWidth > 600 ? 28.sp : 24.sp,
+                          fontWeight: FontWeight.w900,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 10.h),
+                      Text(
+                        'Fill out the form below and our team will contact you within 24 hours',
+                        style: AppTextStyles.headlineMedium.copyWith(
+                          color: AppColors.pureRed,
+                          fontSize: constraints.maxWidth > 600 ? 18.sp : 16.sp,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+
+              SliverPadding(
+                padding: EdgeInsets.all(14.r),
+                sliver: SliverToBoxAdapter(
+                  child: Container(
+                    padding: EdgeInsets.all(18.r),
+                    decoration: BoxDecoration(
+                      color: Colors.grey[900],
+                      borderRadius: BorderRadius.circular(14.r),
+                    ),
+                    child: Form(
+                      key: _formKey,
+                      child: Column(
+                        children: [
+                          _buildFormField(
+                            constraints: constraints,
+                            label: 'Business Name *',
+                            hint: 'Enter your business name',
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your business name';
+                              }
+                              return null;
+                            },
+                            onSaved: (value) => _contactForm.businessName = value ?? '',
+                          ),
+                          SizedBox(height: 16.h),
+
+                          _buildFormField(
+                            constraints: constraints,
+                            label: 'Contact Name *',
+                            hint: 'Enter your name',
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your name';
+                              }
+                              return null;
+                            },
+                            onSaved: (value) => _contactForm.contactName = value ?? '',
+                          ),
+                          SizedBox(height: 16.h),
+
+                          _buildFormField(
+                            constraints: constraints,
+                            label: 'Email Address *',
+                            hint: 'Enter your email',
+                            keyboardType: TextInputType.emailAddress,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please enter your email';
+                              }
+                              if (!Validators.isValidEmail(value)) {
+                                return 'Please enter a valid email';
+                              }
+                              return null;
+                            },
+                            onSaved: (value) => _contactForm.email = value ?? '',
+                          ),
+                          SizedBox(height: 16.h),
+
+                          _buildFormField(
+                            constraints: constraints,
+                            label: 'Phone Number',
+                            hint: 'Enter your phone number',
+                            keyboardType: TextInputType.phone,
+                            validator: (value) {
+                              if (value != null && value.isNotEmpty) {
+                                if (!Validators.isValidPhone(value)) {
+                                  return 'Please enter a valid phone number';
+                                }
+                              }
+                              return null;
+                            },
+                            onSaved: (value) => _contactForm.phone = value ?? '',
+                          ),
+                          SizedBox(height: 16.h),
+
+                          _buildDropdown(
+                            constraints: constraints,
+                            label: 'Business Type *',
+                            value: _contactForm.businessType,
+                            items: _businessTypes,
+                            validator: (value) {
+                              if (value == null || value.isEmpty) {
+                                return 'Please select your business type';
+                              }
+                              return null;
+                            },
+                            onChanged: (value) {
+                              setState(() {
+                                _contactForm.businessType = value ?? '';
+                              });
+                            },
+                          ),
+                          SizedBox(height: 16.h),
+
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Number of Locations',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: constraints.maxWidth > 600 ? 16.sp : 14.sp,
+                                ),
+                              ),
+                              SizedBox(height: 4.h),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8.r),
+                                  border: Border.all(color: Colors.grey[400]!),
+                                ),
+                                child: Row(
+                                  children: [
+                                    IconButton(
+                                      icon: Icon(Icons.remove, color: Colors.black),
+                                      onPressed: () {
+                                        setState(() {
+                                          if (_contactForm.locations > 1) {
+                                            _contactForm.locations--;
+                                          }
+                                        });
+                                      },
+                                    ),
+                                    Expanded(
+                                      child: Text(
+                                        _contactForm.locations.toString(),
+                                        textAlign: TextAlign.center,
+                                        style: AppTextStyles.titleMedium.copyWith(
+                                          color: Colors.black,
+                                          fontSize: constraints.maxWidth > 600 ? 18.sp : 16.sp,
+                                        ),
+                                      ),
+                                    ),
+                                    IconButton(
+                                      icon: Icon(Icons.add, color: Colors.black),
+                                      onPressed: () {
+                                        setState(() {
+                                          _contactForm.locations++;
+                                        });
+                                      },
+                                    ),
+                                  ],
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 16.h),
+
+                          _buildDropdown(
+                            constraints: constraints,
+                            label: 'Interested Plan *',
+                            value: _contactForm.interestedPlan,
+                            items: _planOptions,
+                            validator: (value) {
+                              if (value == null || value.isEmpty || value == 'Select a plan') {
+                                return 'Please select a plan';
+                              }
+                              return null;
+                            },
+                            onChanged: (value) {
+                              setState(() {
+                                _contactForm.interestedPlan = value ?? '';
+                              });
+                            },
+                          ),
+                          SizedBox(height: 16.h),
+
+                          Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text(
+                                'Message (Optional)',
+                                style: AppTextStyles.bodyMedium.copyWith(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w500,
+                                  fontSize: constraints.maxWidth > 600 ? 16.sp : 14.sp,
+                                ),
+                              ),
+                              SizedBox(height: 4.h),
+                              Container(
+                                decoration: BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.circular(8.r),
+                                  border: Border.all(color: Colors.grey[400]!),
+                                ),
+                                child: TextFormField(
+                                  style: AppTextStyles.bodyMedium.copyWith(
+                                    color: Colors.black,
+                                  ),
+                                  decoration: InputDecoration(
+                                    hintText: 'Tell us about your needs or ask any questions...',
+                                    hintStyle: AppTextStyles.bodyMedium.copyWith(
+                                      color: Colors.black54,
+                                    ),
+                                    border: InputBorder.none,
+                                    contentPadding: EdgeInsets.all(14.r),
+                                  ),
+                                  maxLines: 4,
+                                  keyboardType: TextInputType.multiline,
+                                  onSaved: (value) => _contactForm.message = value ?? '',
+                                ),
+                              ),
+                            ],
+                          ),
+                          SizedBox(height: 16.h),
+
+                          Container(
+                            decoration: BoxDecoration(
+                              color: Colors.black.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(10.r),
+                              border: Border.all(color: Colors.white30),
+                            ),
+                            padding: EdgeInsets.all(12.r),
+                            child: Row(
+                              children: [
+                                Container(
+                                  width: 24.w,
+                                  height: 24.h,
+                                  decoration: BoxDecoration(
+                                    borderRadius: BorderRadius.circular(4.r),
+                                    border: Border.all(
+                                      color: _contactForm.requestCallback
+                                          ? AppColors.pureRed
+                                          : Colors.white60,
+                                      width: 2,
+                                    ),
+                                    color: _contactForm.requestCallback
+                                        ? AppColors.pureRed
+                                        : Colors.transparent,
+                                  ),
+                                  child: Checkbox(
+                                    value: _contactForm.requestCallback,
+                                    onChanged: (value) {
+                                      setState(() {
+                                        _contactForm.requestCallback = value ?? false;
+                                      });
+                                    },
+                                    activeColor: AppColors.pureRed,
+                                    checkColor: Colors.white,
+                                    fillColor: MaterialStateProperty.resolveWith<Color>(
+                                          (Set<MaterialState> states) {
+                                        return Colors.transparent;
+                                      },
+                                    ),
+                                    side: BorderSide.none,
+                                    materialTapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                                  ),
+                                ),
+                                SizedBox(width: 12.w),
+                                Expanded(
+                                  child: Text(
+                                    'Request a callback from our sales team',
+                                    style: AppTextStyles.bodyMedium.copyWith(
+                                      color: Colors.white,
+                                      fontSize: constraints.maxWidth > 600 ? 16.sp : 14.sp,
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+
+                          SizedBox(height: 32.h),
+
+                          SizedBox(
+                            width: double.infinity,
+                            child: ElevatedButton(
+                              onPressed: _isSubmitting ? null : _sendEmailViaSMTP,
+                              style: ElevatedButton.styleFrom(
+                                backgroundColor: AppColors.pureRed,
+                                foregroundColor: Colors.white,
+                                padding: EdgeInsets.symmetric(vertical: 14.h),
+                                shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(22.r),
+                                ),
+                              ),
+                              child: _isSubmitting
+                                  ? SizedBox(
+                                width: 24.w,
+                                height: 24.w,
+                                child: CircularProgressIndicator(
+                                  strokeWidth: 2,
+                                  color: Colors.white,
+                                ),
+                              )
+                                  : Text(
+                                'Submit Enquiry',
+                                style: AppTextStyles.button.copyWith(
+                                  color: Colors.white,
+                                  fontSize: constraints.maxWidth > 600 ? 16.sp : 14.sp,
+                                ),
+                              ),
+                            ),
+                          ),
+
+                          SizedBox(height: 16.h),
+                          if (_submitMessage != null)
+                            Container(
+                              padding: EdgeInsets.all(16.w),
+                              decoration: BoxDecoration(
+                                color: _isSuccess
+                                    ? Colors.green.withOpacity(0.1)
+                                    : Colors.red.withOpacity(0.1),
+                                borderRadius: BorderRadius.circular(14.r),
+                                border: Border.all(
+                                  color: _isSuccess
+                                      ? Colors.green.withOpacity(0.3)
+                                      : Colors.red.withOpacity(0.3),
+                                ),
+                              ),
+                              child: Row(
+                                children: [
+                                  Icon(
+                                    _isSuccess ? Icons.check_circle : Icons.error,
+                                    color: _isSuccess ? Colors.green : Colors.red,
+                                  ),
+                                  SizedBox(width: 12.w),
+                                  Expanded(
+                                    child: Text(
+                                      _submitMessage!,
+                                      style: AppTextStyles.bodyMedium.copyWith(
+                                        color: _isSuccess ? Colors.green : Colors.red,
+                                        fontSize: constraints.maxWidth > 600 ? 16.sp : 14.sp,
+                                      ),
+                                    ),
+                                  ),
+                                ],
+                              ),
+                            ),
+
+                          SizedBox(height: 16.h),
+                          Text(
+                            '* Required fields',
+                            style: AppTextStyles.caption.copyWith(
+                              color: Colors.white70,
+                              fontSize: constraints.maxWidth > 600 ? 14.sp : 12.sp,
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+
+              SliverToBoxAdapter(
+                child: Container(
+                  margin: EdgeInsets.all(14.r),
+                  padding: EdgeInsets.all(18.r),
+                  decoration: BoxDecoration(
+                    gradient: LinearGradient(
+                      begin: Alignment.topLeft,
+                      end: Alignment.bottomRight,
+                      colors: [
+                        Colors.grey[900]!,
+                        Colors.black,
+                      ],
+                    ),
+                    borderRadius: BorderRadius.circular(14.r),
+                  ),
+                  child: Column(
+                    children: [
+                      Text(
+                        'Prefer to contact us directly?',
+                        style: AppTextStyles.titleLarge.copyWith(
+                          color: Colors.white,
+                          fontSize: constraints.maxWidth > 600 ? 22.sp : 20.sp,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 14.h),
+
+                      if (constraints.maxWidth > 600)
+                        Row(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            Expanded(
+                              child: _buildContactOption(
+                                constraints: constraints,
+                                icon: Icons.email,
+                                title: 'Email',
+                                subtitle: 'info@spy-darecordings.com',
+                                onTap: () => _launchSimpleEmail('info@spy-damusic.com'),
+                              ),
+                            ),
+                            SizedBox(width: 20.w),
+                            Expanded(
+                              child: _buildContactOption(
+                                constraints: constraints,
+                                icon: Icons.phone,
+                                title: 'Phone',
+                                subtitle: '+44 (0) 207 101 4363',
+                                onTap: () => _launchUrl('tel:+4402071014363'),
+                              ),
+                            ),
+                          ],
+                        )
+                      else
+                        Column(
+                          children: [
+                            _buildContactOption(
+                              constraints: constraints,
+                              icon: Icons.email,
+                              title: 'Email',
+                              subtitle: 'info@spy-damusic.com',
+                              onTap: () => _launchSimpleEmail('info@spy-damusic.com'),
+                            ),
+                            SizedBox(height: 16.h),
+                            _buildContactOption(
+                              constraints: constraints,
+                              icon: Icons.phone,
+                              title: 'Phone',
+                              subtitle: '+44 (0) 207 101 4363',
+                              onTap: () => _launchUrl('tel:+4402071014363'),
+                            ),
+                          ],
+                        ),
+                    ],
+                  ),
+                ),
+              ),
+
+              SliverToBoxAdapter(
+                child: Container(
+                  padding: EdgeInsets.all(18.r),
+                  color: Colors.black,
+                  child: Column(
+                    children: [
+                      Icon(
+                        Icons.music_note,
+                        size: 28.sp,
+                        color: AppColors.pureRed,
+                      ),
+                      SizedBox(height: 10.h),
+                      Text(
+                        'SPY-DA RECORDINGS',
+                        style: AppTextStyles.titleLarge.copyWith(
+                          color: Colors.white,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1.5,
+                          fontSize: constraints.maxWidth > 600 ? 20.sp : 18.sp,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 4.h),
+                      Text(
+                        'Professional Music Solutions',
+                        style: AppTextStyles.bodyMedium.copyWith(
+                          color: Colors.white70,
+                          fontSize: constraints.maxWidth > 600 ? 16.sp : 14.sp,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                      SizedBox(height: 14.h),
+                      Text(
+                        '© ${DateTime.now().year} Spy-da Recordings. All rights reserved.',
+                        style: AppTextStyles.caption.copyWith(
+                          color: Colors.white30,
+                          fontSize: constraints.maxWidth > 600 ? 14.sp : 12.sp,
+                        ),
+                        textAlign: TextAlign.center,
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ],
+          );
+        },
       ),
     );
   }
 
   Widget _buildFormField({
+    required BoxConstraints constraints,
     required String label,
     required String hint,
     TextInputType? keyboardType,
@@ -595,26 +827,41 @@ Automatically generated from Spy-da Recordings contact form.
         Text(
           label,
           style: AppTextStyles.bodyMedium.copyWith(
+            color: Colors.white,
             fontWeight: FontWeight.w500,
+            fontSize: constraints.maxWidth > 600 ? 16.sp : 14.sp,
           ),
         ),
         SizedBox(height: 4.h),
-        TextFormField(
-          decoration: InputDecoration(
-            hintText: hint,
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.r),
-            ),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(color: Colors.grey[400]!),
           ),
-          keyboardType: keyboardType,
-          validator: validator,
-          onSaved: onSaved,
+          child: TextFormField(
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: Colors.black,
+            ),
+            decoration: InputDecoration(
+              hintText: hint,
+              hintStyle: AppTextStyles.bodyMedium.copyWith(
+                color: Colors.black54,
+              ),
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.all(14.r),
+            ),
+            keyboardType: keyboardType,
+            validator: validator,
+            onSaved: onSaved,
+          ),
         ),
       ],
     );
   }
 
   Widget _buildDropdown({
+    required BoxConstraints constraints,
     required String label,
     required String value,
     required List<String> items,
@@ -627,66 +874,98 @@ Automatically generated from Spy-da Recordings contact form.
         Text(
           label,
           style: AppTextStyles.bodyMedium.copyWith(
+            color: Colors.white,
             fontWeight: FontWeight.w500,
+            fontSize: constraints.maxWidth > 600 ? 16.sp : 14.sp,
           ),
         ),
         SizedBox(height: 4.h),
-        DropdownButtonFormField<String>(
-          value: value.isNotEmpty ? value : null,
-          decoration: InputDecoration(
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.r),
-            ),
-            hintText: 'Select $label',
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(8.r),
+            border: Border.all(color: Colors.grey[400]!),
           ),
-          items: items.map((item) {
-            return DropdownMenuItem<String>(
-              value: item == 'Select a plan' ? '' : item,
-              child: Text(
-                item,
-                style: TextStyle(
-                  color: item == 'Select a plan' ? AppColors.textSecondary : null,
+          child: DropdownButtonFormField<String>(
+            value: value.isNotEmpty ? value : null,
+            dropdownColor: Colors.white,
+            style: AppTextStyles.bodyMedium.copyWith(
+              color: Colors.black,
+            ),
+            decoration: InputDecoration(
+              border: InputBorder.none,
+              contentPadding: EdgeInsets.symmetric(horizontal: 14.w),
+            ),
+            items: items.map((item) {
+              return DropdownMenuItem<String>(
+                value: item == 'Select a plan' ? '' : item,
+                child: Text(
+                  item,
+                  style: AppTextStyles.bodyMedium.copyWith(
+                    color: item == 'Select a plan' ? Colors.black54 : Colors.black,
+                  ),
                 ),
-              ),
-            );
-          }).toList(),
-          validator: validator,
-          onChanged: onChanged,
+              );
+            }).toList(),
+            validator: validator,
+            onChanged: onChanged,
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildNumberField({
-    required String label,
-    required int value,
-    void Function(int?)? onChanged,
+  Widget _buildContactOption({
+    required BoxConstraints constraints,
+    required IconData icon,
+    required String title,
+    required String subtitle,
+    required VoidCallback onTap,
   }) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          label,
-          style: AppTextStyles.bodyMedium.copyWith(
-            fontWeight: FontWeight.w500,
-          ),
-        ),
-        SizedBox(height: 4.h),
-        TextFormField(
-          initialValue: value.toString(),
-          decoration: InputDecoration(
-            hintText: 'Enter number of locations',
-            border: OutlineInputBorder(
-              borderRadius: BorderRadius.circular(8.r),
+    return Container(
+      padding: EdgeInsets.all(16.r),
+      decoration: BoxDecoration(
+        color: Colors.black,
+        borderRadius: BorderRadius.circular(14.r),
+        border: Border.all(color: Colors.white30),
+      ),
+      child: InkWell(
+        onTap: onTap,
+        child: Column(
+          children: [
+            Container(
+              padding: EdgeInsets.all(12.r),
+              decoration: BoxDecoration(
+                color: AppColors.pureRed.withOpacity(0.2),
+                shape: BoxShape.circle,
+              ),
+              child: Icon(
+                icon,
+                color: AppColors.pureRed,
+                size: constraints.maxWidth > 600 ? 28.sp : 24.sp,
+              ),
             ),
-          ),
-          keyboardType: TextInputType.number,
-          onChanged: (value) {
-            final num = int.tryParse(value);
-            onChanged?.call(num);
-          },
+            SizedBox(height: 10.h),
+            Text(
+              title,
+              style: AppTextStyles.titleMedium.copyWith(
+                color: Colors.white,
+                fontSize: constraints.maxWidth > 600 ? 18.sp : 16.sp,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            SizedBox(height: 4.h),
+            Text(
+              subtitle,
+              style: AppTextStyles.bodyMedium.copyWith(
+                color: Colors.white70,
+                fontSize: constraints.maxWidth > 600 ? 16.sp : 14.sp,
+              ),
+              textAlign: TextAlign.center,
+            ),
+          ],
         ),
-      ],
+      ),
     );
   }
 
@@ -696,7 +975,7 @@ Automatically generated from Spy-da Recordings contact form.
         await launchUrl(Uri.parse(url));
       }
     } catch (e) {
-      // Silently fail
+      print('Error launching URL: $e');
     }
   }
 
@@ -711,7 +990,7 @@ Automatically generated from Spy-da Recordings contact form.
         await launchUrl(Uri.parse(uri));
       }
     } catch (e) {
-      // Silently fail
+      print('Error launching email: $e');
     }
   }
 }
